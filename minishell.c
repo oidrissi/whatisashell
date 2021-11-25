@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 19:52:22 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/24 01:17:30 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/25 22:40:42 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,63 @@
 
 int	g_error;
 
-t_expr	*init_sh()
+t_cmd	*init_sh()
 {
-	g_sh = (t_expr *)malloc(sizeof(t_expr));
-	g_sh->cmd = (t_cmd *)malloc(sizeof(t_cmd));
-	g_sh->cmd->args = NULL;
-	g_sh->cmd->red.name = NULL;
-	g_sh->cmd->red.type = 0;
-	g_sh->cmd->red.next = NULL;
-	g_sh->cmd->next = NULL;
-	g_sh->cmd->prev = NULL;
+	g_sh = (t_cmd *)malloc(sizeof(t_cmd));
+	g_sh->args = NULL;
+	g_sh->red.name = NULL;
+	g_sh->red.type = 0;
+	g_sh->red.next = NULL;
+	g_sh->next = NULL;
+	// g_sh->prev = NULL;
 	return (g_sh);
+}
+
+//check if token contains a redirection symbol and set the redirection type
+int		check_redirection(char *token)
+{
+	int i = 0;
+	int len = ft_strlen(token);
+	while (i < len)
+	{
+		if (token[i] == '>')
+		{
+			if (token[i + 1] == '>')
+			{
+				g_sh->red.type = 2;
+				return (1);
+			}
+			g_sh->red.type = 1;
+			return (1);
+		}
+		if (token[i] == '<')
+		{
+			if (token[i + 1] == '<')
+			{
+				g_sh->red.type = 4;
+				return (1);
+			}
+			g_sh->red.type = 3;
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+void	f_sh(char** args, t_red red)
+{
+	g_sh->args = args;
+	(void) red;
+	int i = 0;
+	while (g_sh->args[i])
+	{
+		check_redirection(g_sh->args[i]);
+		printf("%d\n", g_sh->red.type);
+		i++;
+	}
+	// printf("VALUE OF T_RED : %d\n", check_redirection(g_sh->args));
+	// while (args[i])
 }
 
 int 	tab_len(char **s) {
@@ -142,6 +188,7 @@ char	*get_token(char *s, int *pos, char del) {
 		j = 0;
 		if ((i == len || s[i] == del) && in_quotes(s, i))
 			break ;
+		// if (s[i] == 0)
 		ret[c] = s[i];
 		i++;
 		c++;
@@ -160,16 +207,45 @@ char	**new_split(char *s,  char d) {
 	len = ft_strlen(s);
 	while (i < len)
 	{
-		ret = realloc_str(ret, get_token(s, &i, d));
+		char* b= get_token(s, &i, d);
+		if (b != '\0')
+			ret = realloc_str(ret, b);
 		i++;
 	}
+	// ret[i] = NULL;
 	return ret;
 }
-// check if string contains pipe, if not return 0
 
-t_expr	*fill_sh(char *line)
+// check if string contains pipe, if not return 0
+t_cmd	*fill_sh(char *line)
 {
-	g_sh->cmd->args = new_split(line, '|');
+	char ** args;
+	int i = 0;
+	args = new_split(line, '|');
+	while (args[i])
+	{
+		g_sh->args = new_split(ft_strtrim(args[i]), ' ');
+		int j = 0;
+		while (g_sh->args[j])
+		{
+			printf("%s\n", g_sh->args[j]);
+			j++;
+		}
+		// while (g_sh->next)
+		// {
+		// 	int j = 0;
+		// 	g_sh->args = &args[i];
+		// 	while (g_sh->args[j])
+		// 	{
+		// 		check_redirection(g_sh->args[j]);
+		// 		printf("I m here |||||||");
+		// 		printf("%s\n", g_sh->args[j]);
+		// 		j++;
+		// 	}
+		// 	g_sh = g_sh->next;
+		// }
+		i++;
+	}
 	return (g_sh);
 }
 
@@ -214,7 +290,11 @@ int		proper_quotes(char *s)
 			while (s[j])
 			{
 				if (s[j] == '\'')
+				{
 					sgl++;
+					i += 1;
+					break ;
+				}
 				i++;
 				j++;
 			}
@@ -226,7 +306,11 @@ int		proper_quotes(char *s)
 			while (s[j])
 			{
 				if (s[j] == '\"')
+				{
 					dbl++;
+					i += 1;
+					break ;
+				}
 				i++;
 				j++;
 			}
@@ -245,10 +329,14 @@ char	*trim_whitespaces(char *s)
 	int len = ft_strlen(s);
 	if (!s || !*s)
 		return (NULL);
+	while (s[i] == ' ' || s[i] == '\t')
+		i++;
 	while (s[len - 1] == ' ')
 		len--;
 	return (ft_substr(s, i, len - i));
 }
+
+
 
 int		parse(char *s)
 {
@@ -259,24 +347,6 @@ int		parse(char *s)
 	if (!proper_quotes(s))
 		return (0);
 	return (1);
-}
-
-char	*ft_strtrim(char *s)
-{
-	int i = 0;
-	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (len + 1));
-	while (s[i] == ' ' || s[i] == '\t')
-		i++;
-	int j = 0;
-	while (s[i] != '\0')
-	{
-		ret[j] = s[i];
-		i++;
-		j++;
-	}
-	ret[j] = '\0';
-	return ret;
 }
 
 // count number of env variables in string
@@ -358,106 +428,111 @@ char	*replace_env(char *s)
 	return ret;
 }
 
-//check if token contains a redirection symbol and set the redirection type
-int		check_redirection(char *token)
+// set new env variable in envp
+char	**set_env(char **envp, char *s)
 {
 	int i = 0;
-	int len = ft_strlen(token);
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (len + 1));
+	int j = 0;
 	while (i < len)
 	{
-		if (token[i] == '>')
+		if (s[i] == '$')
 		{
-			if (token[i + 1] == '>')
+			i++;
+			while (s[i] != ' ' && s[i] != '\t' && s[i] != '\0')
 			{
-				g_sh->cmd->red.type = 2;
-				return (1);
+				ret[j] = s[i];
+				i++;
+				j++;
 			}
-			g_sh->cmd->red.type = 1;
-			return (1);
+			ret[j] = '\0';
+			char *tmp = get_env(ret);
+			if (tmp)
+			{
+				int k = 0;
+				while (tmp[k] != '\0')
+				{
+					ret[j] = tmp[k];
+					j++;
+					k++;
+				}
+				ret[j] = '\0';
+			}
+			i++;
+			j = 0;
 		}
-		i++;
+		else
+		{
+			ret[j] = s[i];
+			i++;
+			j++;
+		}
 	}
-	return (0);
+	ret[j] = '\0';
+	char **new_envp = (char **)malloc(sizeof(char *) * (tab_len(envp) + 2));
+	int k = 0;
+	while (envp[k])
+	{
+		new_envp[k] = envp[k];
+		k++;
+	}
+	new_envp[k] = ret;
+	new_envp[k + 1] = NULL;
+	return new_envp;
 }
-
-// if string contains env variables, replace them with the value of the env variable
-// char	*replace_env(char *s)
-// {
-// 	int i = 0;
-// 	int len = ft_strlen(s);
-// 	char *ret = (char *)malloc(sizeof(char) * (len * 10 + 1));
-// 	while (s[i] != '$')
-// 	{
-// 		ret[i] = s[i];
-// 		i++;
-// 	}
-// 	i++;
-// 	char **env = get_env(s);
-// 	char *val = getenv(env);
-// 	if (val)
-// 	{
-// 		int j = 0;
-// 		while (val[j])
-// 		{
-// 			ret[i + j] = val[j];
-// 			j++;
-// 		}
-// 		ret[i + j] = '\0';
-// 	}
-// 	else
-// 	{
-// 		ret[i] = '\0';
-// 	}
-// 	return ret;
-// }
-
-// check if token is 
 
 int main(int ac, char **av, char **env)
 {
     char *line;
-	int		i;
+	// int		i;
 	int		nb_env;
 	
-	i = 0;
+	// i = 0;
 	(void)av;
+	(void)env;
 	g_sh = init_sh();
 	g_error = 0;
 	if (ac != 1)
 		return (0);
-	i = 0;
+	// i = 0;
 	while (1)
 	{
-		line = readline("$> ");
+		line = readline("\033[0;33mSh>");
 		if (*line)
 			add_history(line);
 		nb_env = count_env(line);
 		line = trim_whitespaces(line);
 		if (nb_env > 0)
 			line = replace_env(line);
+		if (!line)
+				continue ;
+		// printf("%s\n", line);
 		if (!parse(line))
 		{
-			if (!line)
-				continue ;
 			write(1, "syntax error\n", 13);
 			continue;
 		}
+		// if (!g_sh)
 		g_sh = fill_sh(line);
-		while (g_sh->cmd->args[i])
+		// set env
+		while (g_sh->next != NULL)
 		{
-			char **sub = new_split(ft_strtrim(g_sh->cmd->args[i]), ' ');
-			int len = tab_len(sub);
-			int j = 0;
-			printf("Command %d + args ==> %s\n", i, g_sh->cmd->args[i]);
-			while (j < len)
-			{
-				printf("\t%d\t\t**%s**\n", j, sub[j]);
-				j++;
-			}
+			// char **sub = new_split(ft_strtrim(g_sh->args[i]), ' ');
+			// int len = tab_len(sub);
+			// int j = 0;
+			// printf("Command %d + args ==> %s\n", i, g_sh->args[i]);
+			// while (j < len)
+			// {
+			// 	printf("\t%d\t\t**%s**%lu\n", j, sub[j], strlen(sub[j]));
+			// 	j++;
+			// }
+			//  sub[0] contains the command
 			pid_t pid = fork();
 			if (pid == 0)
 			{
-				if (execve(sub[0], sub, env) == -1 && !is_builtin(sub[0]))
+				//execute here
+				if (execve(g_sh->args[0], g_sh->args, env) == -1 && !is_builtin(g_sh->args[0]))
 				{
 					write(1, "command not found\n", 19);
 					return (0);
@@ -467,9 +542,9 @@ int main(int ac, char **av, char **env)
 			{
 				wait(NULL);
 			}	
-			i++;
+			// i++;
 		}
-		i = 0;
+		// i = 0;
 	}
 	free(line);
 	return (0);

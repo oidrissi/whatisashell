@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 22:01:58 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/23 00:09:35 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/25 14:14:25 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,25 @@ int	is_builtin(char *s)
 	if (ft_strcmp(s, "pwd") == 0)
 		return (1);
 	return (0);
+}
+
+
+char	*ft_strtrim(char *s)
+{
+	int i = 0;
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (len + 1));
+	while (s[i] == ' ' || s[i] == '\t')
+		i++;
+	int j = 0;
+	while (s[i] != '\0')
+	{
+		// if (s[i] == ' ' && in_quotes(s, i) && i++)
+		// 	continue ;
+		ret[j] = s[i];
+		i++;
+		j++;
+	}
+	ret[j] = '\0';
+	return ret;
 }

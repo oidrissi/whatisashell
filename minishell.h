@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 19:51:07 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/23 15:49:44 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/25 14:14:31 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,21 +39,15 @@ typedef struct  s_cmd
     char    **args;
     t_red     red;
     struct s_cmd *next;
-    struct s_cmd *prev;
 }               t_cmd;
 
-typedef struct  s_expr
-{
-    t_cmd     *cmd;
-    struct s_expr *next;
-}   t_expr;
-
-t_expr         *g_sh;
+t_cmd           *g_sh;
 
 int     main(int ac, char **av, char **env);
 int	    ft_strlen(char *s);
 char	**ft_strsplit(char *s, char c);
 int	    is_builtin(char *s);
+char	*ft_strtrim(char *s);
 
 
 #endif

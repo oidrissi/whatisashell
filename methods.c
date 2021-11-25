@@ -6,29 +6,30 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/23 15:50:11 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/24 00:23:25 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/25 14:38:31 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 //create a new linked list
-s_env	*ft_lstnew(void *content)
+t_cmd	*ft_lstnew(char **args, t_red red)
 {
-    s_env *new;
+    t_cmd *new;
 
-    if (!(new = (t_list*)malloc(sizeof(t_list))))
+    if (!(new = (t_cmd *)malloc(sizeof(t_cmd))))
         return (NULL);
-    new->key = NULL;
-    new->value = NULL;
+    new->args = args;
+    new->red = red;
+    //new->red.type = 0;
     new->next = NULL;
     return (new);
 }
 
 // add a new element to the list
-void	ft_lstadd(s_env **lst, s_env *new)
+void	ft_lstadd(t_cmd **lst, t_cmd *new)
 {
-    s_env *tmp;
+    t_cmd *tmp;
 
     if (!*lst)
         *lst = new;
@@ -42,16 +43,16 @@ void	ft_lstadd(s_env **lst, s_env *new)
 }
 
 // insert a new element at the beginning of the list
-void	ft_lstinsert(s_env **lst, s_env *new)
+void	ft_lstinsert(t_cmd **lst, t_cmd *new)
 {
     new->next = *lst;
     *lst = new;
 }
 
 // ft_lstdelone
-void    ft_lstdelone(s_env **lst)
+void    ft_lstdelone(t_cmd **lst)
 {
-    s_env *tmp;
+    t_cmd *tmp;
 
     tmp = *lst;
     *lst = tmp->next;
@@ -59,14 +60,14 @@ void    ft_lstdelone(s_env **lst)
 }
 
 // free the list
-void	ft_lstdel(s_env **lst, void (*del)(void *, size_t))
+void	ft_lstdel(t_cmd **lst)
 {
-    s_env *tmp;
+    t_cmd *tmp;
 
     while (*lst)
     {
         tmp = *lst;
         *lst = (*lst)->next;
-        ft_lstdelone(&tmp, del);
+        ft_lstdelone(&tmp);
     }
 }
