@@ -42,8 +42,6 @@ typedef struct  s_cmd
     t_env     *env;
 }               t_cmd;
 
-t_cmd           *g_sh;
-
 int     main(int ac, char **av, char **env);
 int	    ft_strlen(char *s);
 char	**ft_strsplit(char *s, char c);

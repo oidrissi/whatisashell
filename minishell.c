@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	g_error;
+t_cmd           *g_sh;
 
 t_red	*init_red()
 {
@@ -48,8 +48,8 @@ char	*get_arg(char *str, int *i)
 	char	*arg;
 
 	compt = 0;
-	while (str[compt] == ' ')						// delete necessary spaces
-		compt++;										// delete necessary spaces
+	while (str[compt] == ' ')
+		compt++;	
 	compt2 = compt;
 	while (str[compt] != ' ' && str[compt] != '\0')
 		compt++;
@@ -87,7 +87,6 @@ t_red	*redirections(char *str)
 					red->type = 1;
 					red = fill_red(red, get_arg(str + i + 1, &i), red->type);
 				}
-				// printf("pipe : %d && %s\n", red->type, red->name);
 			}
 			else if (str[i] == '<')
 			{
@@ -101,7 +100,6 @@ t_red	*redirections(char *str)
 					red->type = 3;
 					red = fill_red(red, get_arg(str + i + 1, &i), red->type);
 				}
-				// printf("pipe : %d && %s\n", red->type, red->name);
 			}
 			if (str[i])
 			{
@@ -235,6 +233,8 @@ char	*get_token(char *s, int *pos, char del) {
 	while (i < len && c < word_len)
 	{
 		j = 0;
+		while (s[j] == ' ')
+			j++;
 		if ((i == len || s[i] == del) && in_quotes(s, i))
 			break ;
 		ret[c] = s[i];
@@ -256,17 +256,12 @@ char	**new_split(char *s,  char d) {
 	while (i < len)
 	{
 		char* b= get_token(s, &i, d);
-		// printf("|xx%sxx|\n", b);
 		if (b != '\0')
 			ret = realloc_str(ret, b);
 		i++;
 	}
-	// ret[i] = NULL;
 	return ret;
 }
-
-// ignore all whitespaces between words
-
 
 // check if string contains pipe, if not return 0
 t_cmd	*fill_sh(char *line)
@@ -277,15 +272,16 @@ t_cmd	*fill_sh(char *line)
 	args = new_split(line, '|');
 	while (args[i])
 	{
-		// printf("%s\n", args[i]);
+		printf("CMD %d contains: \n", i);
 		g_sh = ft_lstnew(new_split(ft_strtrim(args[i]), ' '), redirections(args[i]));
-		// int j = 0;
-		// while(g_sh->args[j])
-		// {
-			// printf("%s\n", g_sh->args[j]);
-			// j++;
-		// }
-		// printf("%s\n", g_sh->next->args[j]);
+		int j = 0;
+		while(g_sh->args[j])
+		{
+			while (strcmp(g_sh->args[j], " ") == 0)
+				j++;
+			printf("%s\n", g_sh->args[j]);
+			j++;
+		}
 		g_sh = g_sh->next;
 		i++;
 	}
@@ -471,25 +467,22 @@ char	*replace_env(char *s)
 // 	}
 // }
 
+
+
 int main(int ac, char **av, char **env)
 {
     char *line;
-	// int		i;
-	// int		nb_env;
 	
 	(void)av;
 	(void)env;
-	g_error = 0;
 	if (ac != 1)
 		return (0);
-	// fill_env(env);
 	while (1)
 	{
 		line = readline("\033[0;33mSh>");
 		if (*line)
 			add_history(line);
-		// nb_env = count_env(line);
-		// line = trim_whitespaces(line);
+		line = trim_whitespaces(line);
 		if (!line)
 				continue ;
 		if (!parse(line))
@@ -497,7 +490,6 @@ int main(int ac, char **av, char **env)
 			write(1, "syntax error\n", 13);
 			continue;
 		}
-		// printf("%s\n", line);
 		g_sh = fill_sh(line);
 	}
 	free(line);
