@@ -57,7 +57,7 @@ char	*get_arg(char *str, int *i)
 		return (NULL);
 	compt = compt2;
 	compt2 = 0;
-	while (str[compt] && str[compt] != ' ')	
+	while (str[compt] && str[compt] != ' ')
 		arg[compt2++] = str[compt++];
 	arg[compt2] = '\0';
 	*i += compt + 1;
@@ -200,36 +200,20 @@ int get_wordlen(char *s, int *pos, char del) {
 	return c;
 }
 
-int in_quotes(char *s, int pos)
+char	*get_token(char *s, int *pos, char del)
 {
-	int j = pos - 1;
-	
-	int indb = 0;
-	int	insgl = 0;
-	while (j >= 0)
-	{
-		while ( j >= 0 && (s[j] == '\'' || s[j] == '\"'))
-		{
-			if (s[j] == '\'')
-				insgl++;
-			else if (s[j] == '\"')
-				indb++;
-			j--;	
-		}
-		j--;
-	}
-	if (indb % 2 == 0 && insgl % 2 == 0)
-		return 1;
-	return 0;
-}
-char	*get_token(char *s, int *pos, char del) {
+	int i;
+	int len;
+	int word_len;
+	char *ret;
+	int c;
+	int j;
 
-	int i = *pos;
-	int len = ft_strlen(s);
-	int word_len  = get_wordlen(s, pos, del);
-	char *ret = (char *)malloc(sizeof(char) * (word_len + 1));
-	int c  = 0;
-	int j = 0;
+	c = 0;
+	i = *pos;
+	len = ft_strlen(s);
+	word_len  = get_wordlen(s, pos, del);
+	ret = (char *)malloc(sizeof(char) * (word_len + 1));
 	while (i < len && c < word_len)
 	{
 		j = 0;
@@ -278,7 +262,7 @@ t_cmd	*fill_sh(char *line)
 		while(g_sh->args[j])
 		{
 			while (strcmp(g_sh->args[j], " ") == 0)
-				j++;
+				continue ;
 			printf("%s\n", g_sh->args[j]);
 			j++;
 		}
@@ -353,6 +337,8 @@ char	*trim_whitespaces(char *s)
 		return (NULL);
 	while (s[i] == ' ' || s[i] == '\t')
 		i++;
+	if (i == len)
+		return (ft_strdup(""));
 	while (s[len - 1] == ' ')
 		len--;
 	return (ft_substr(s, i, len - i));
@@ -448,27 +434,6 @@ char	*replace_env(char *s)
 	return ret;
 }
 
-//fill list of env variables with their names and values
-// void	fill_env(char **env)
-// {
-// 	t_env *tmp2 = NULL;
-// 	int i = 0;
-// 	while (env[i])
-// 	{
-// 		char *tmp = ft_strtrim(env[i]);
-// 		char *name = get_token(tmp, NULL, '=');
-// 		char *value = get_token(tmp, NULL, '=');
-// 		if (name && value)
-// 		{
-// 			t_env *new = ft_lstnew(new_env(name, value), 0);
-// 			ft_lstadd(&g_sh->env, new);
-// 		}
-// 		i++;
-// 	}
-// }
-
-
-
 int main(int ac, char **av, char **env)
 {
     char *line;
@@ -483,7 +448,7 @@ int main(int ac, char **av, char **env)
 		if (*line)
 			add_history(line);
 		line = trim_whitespaces(line);
-		if (!line)
+		if (line == NULL || !*line)
 				continue ;
 		if (!parse(line))
 		{

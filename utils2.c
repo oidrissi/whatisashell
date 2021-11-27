@@ -27,3 +27,26 @@ char	*ft_substr(char *s, int start, int len)
 	ret[i] = '\0';
 	return ret;
 }
+
+int in_quotes(char *s, int pos)
+{
+	int j = pos - 1;
+	
+	int indb = 0;
+	int	insgl = 0;
+	while (j >= 0)
+	{
+		while ( j >= 0 && (s[j] == '\'' || s[j] == '\"'))
+		{
+			if (s[j] == '\'')
+				insgl++;
+			else if (s[j] == '\"')
+				indb++;
+			j--;	
+		}
+		j--;
+	}
+	if (indb % 2 == 0 && insgl % 2 == 0)
+		return 1;
+	return 0;
+}

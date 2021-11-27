@@ -49,7 +49,6 @@ int	is_builtin(char *s)
 	return (0);
 }
 
-
 char	*ft_strtrim(char *s)
 {
 	int i = 0;

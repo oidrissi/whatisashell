@@ -46,6 +46,7 @@ int     main(int ac, char **av, char **env);
 int	    ft_strlen(char *s);
 char	**ft_strsplit(char *s, char c);
 int	    is_builtin(char *s);
+int     in_quotes(char *s, int pos);
 char	*ft_strtrim(char *s);
 char	*ft_strdup(char *s);
 t_cmd	*ft_lstnew(char **args, t_red *red);
