@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 22:01:58 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/25 14:14:25 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/26 11:49:47 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,5 +67,19 @@ char	*ft_strtrim(char *s)
 		j++;
 	}
 	ret[j] = '\0';
+	return ret;
+}
+
+char	*ft_strdup(char *s)
+{
+	int i = 0;
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (len + 1));
+	while (s[i])
+	{
+		ret[i] = s[i];
+		i++;
+	}
+	ret[i] = '\0';
 	return ret;
 }

@@ -6,25 +6,28 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/23 15:50:11 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/11/25 14:38:31 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/11/26 23:04:57 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 //create a new linked list
-t_cmd	*ft_lstnew(char **args, t_red red)
+t_cmd	*ft_lstnew(char **args, t_red *red)
 {
     t_cmd *new;
 
     if (!(new = (t_cmd *)malloc(sizeof(t_cmd))))
         return (NULL);
     new->args = args;
+    if (!red)
+        new->red = NULL;
     new->red = red;
     //new->red.type = 0;
     new->next = NULL;
     return (new);
 }
+
 
 // add a new element to the list
 void	ft_lstadd(t_cmd **lst, t_cmd *new)
