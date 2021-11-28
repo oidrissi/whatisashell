@@ -1,0 +1,110 @@
+// char	*expand(char *s)
+// {
+// 	int i = 0;
+// 	int j = 0;
+// 	int sgl = 0;
+// 	// int dbl = 0;
+// 	int len = ft_strlen(s);
+// 	char *ret = (char *)malloc(sizeof(char) * (len + 1));
+// 	while (i < len)
+// 	{
+// 		if (s[i] == '\'' && i < len)
+// 			sgl++;
+// 		if (s[i] == '$' && sgl % 2 == 1 && i < len)
+// 		{
+// 			while (s[i] != ' ' && s[i] != '\t' && s[i] != '\0')
+// 			{
+// 				ret[j] = s[i];
+// 				i++;
+// 				j++;
+// 			}
+// 		}
+// 		else if (s[i] == '$' && i < len)
+// 		{
+// 			i++;
+// 			while (s[i] != ' ' && s[i] != '\t' && s[i] != '\0')
+// 			{
+// 				ret[j++] = s[i++];
+// 			}
+// 			ret[j] = '\0';
+// 			char *tmp = ft_substr(ret, 0, ft_strlen(ret));
+// 			ret = getenv(tmp);
+// 			char *new = ft_strjoin(ret, s + i);
+// 			printf("%s\n", new);
+// 			j = 0;
+// 			// if (!tmp)
+// 			// 	return (NULL);
+// 			// else
+// 			// 	printf("%s\n", tmp);
+// 		}
+// 		// else
+// 		// {
+// 		// 	ret[j] = s[i];
+// 		// 	j++;
+// 		// }
+// 		i++;
+// 	}
+// 	ret[j] = '\0';
+// 	return ret;
+// }
+
+// t_env	*expansions(char *str)
+// {
+// 	int		i;
+// 	// char	*arg;
+// 	t_env	*env;
+
+// 	i = 0;
+// 	env = (t_env *)malloc(sizeof(t_env));
+// 	// printf("%s\n", str);
+// 	// while (str[i])
+// 	// {
+// 	// 	if (str[i] == '$')
+// 	// 	{
+// 	// 		arg = get_arg(str, &i);
+// 	// 		if (arg[0] == '\0')
+// 	// 			env->value = ft_strdup("");
+// 	// 		else
+// 	// 		{
+// 	// 			char *tmp = getenv(arg);
+// 	// 			printf("%s\n", tmp);
+// 	// 			// env->value = ft_strdup(getenv(arg));
+// 	// 		}
+// 	// 		env->key = arg;
+// 	// 		free(arg);
+// 	// 	}
+// 	// 	else
+// 	// 		i++;
+// 	// }
+// 	return (env);
+// }
+
+// else if (token[i] == '$' && (insgl % 2 == 0))
+		// {
+		// 	while (token[i] != ' ' && token[i] != '\t' && token[i] != '\0')
+		// 	{
+		// 		ret = append(ret, token[i]);
+		// 		i++;
+		// 	}
+		// 	if (ret == NULL || !ret)
+		// 		ft_strdup("");
+		// 	printf("%s\n", ret);
+			// g_sh->env = expansions(ret);
+			// printf("%s\n", g_sh->env->value);
+			// g_sh->env->next = (t_env *)malloc(sizeof(t_env));
+			// g_sh->env = g_sh->env->next;
+		// }
+		// {
+		
+		// 	// |$PATH| i++;
+		// 	// collecting environment variable name
+		// 	while (token[i] != ' ' && token[i] != '\t' && token[i] != '\0')
+		// 	{
+		// 		ret = get_env(token[i]);
+		// 		i++;
+		// 	}
+		// 	g_sh->env = get_env(token + i);
+		// 	// PATH
+		// 	// char * tmp = get_env();
+		// 	// ret = strjoin(ret, tmp);
+		// }

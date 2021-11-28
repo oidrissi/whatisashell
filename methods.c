@@ -23,8 +23,7 @@ t_cmd	*ft_lstnew(char **args, t_red *red)
     if (!red)
         new->red = NULL;
     new->red = red;
-    //new->red.type = 0;
-    new->next = NULL;
+    // new->env = env;
     return (new);
 }
 

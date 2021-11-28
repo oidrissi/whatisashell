@@ -12,8 +12,6 @@
 
 #include "minishell.h"
 
-t_cmd           *g_sh;
-
 t_red	*init_red()
 {
 	g_sh->red = (t_red *)malloc(sizeof(t_red));
@@ -30,13 +28,28 @@ t_red	*fill_red(t_red *new, char *name, int type)
 	return (new);
 }
 
+t_env	*init_env()
+{
+	g_sh->env = (t_env *)malloc(sizeof(t_env));
+	g_sh->env->key = NULL;
+	g_sh->env->value = NULL;
+	return (g_sh->env);
+}
+
+t_env	*fill_env(t_env *new, char *key, char *value)
+{
+	new->key = key;
+	new->value = value;
+	return (new);
+}
+
 t_cmd	*init_sh()
 {
 	g_sh = (t_cmd *)malloc(sizeof(t_cmd));
 	g_sh->args = NULL;
 	init_red();
+	init_env();
 	g_sh->next = NULL;
-	// g_sh->prev = NULL;
 	return (g_sh);
 }
 
@@ -103,13 +116,13 @@ t_red	*redirections(char *str)
 			}
 			if (str[i])
 			{
-				printf("pipe : %d && %s\n", red->type, red->name);
+				printf("redir_type: %d && filename %s\n", red->type, red->name);
 				red->next = (t_red *)malloc(sizeof(t_red));
 				red = red->next;
 			}
 			else
 			{
-				printf("pipe : %d && %s\n", red->type, red->name);
+				printf("redir_type: %d && filename %s\n", red->type, red->name);
 				red->next = NULL;
 				return (red);
 			}
@@ -251,6 +264,7 @@ char	**new_split(char *s,  char d) {
 t_cmd	*fill_sh(char *line)
 {
 	init_sh();
+	init_env();
 	char ** args;
 	int i = 0;
 	args = new_split(line, '|');
@@ -261,9 +275,7 @@ t_cmd	*fill_sh(char *line)
 		int j = 0;
 		while(g_sh->args[j])
 		{
-			while (strcmp(g_sh->args[j], " ") == 0)
-				continue ;
-			printf("%s\n", g_sh->args[j]);
+			printf("%s\n", parse_token(g_sh->args[j]));
 			j++;
 		}
 		g_sh = g_sh->next;
@@ -344,6 +356,30 @@ char	*trim_whitespaces(char *s)
 	return (ft_substr(s, i, len - i));
 }
 
+// skip spaces only if not inside quotes
+int		skip_spaces(char *s, int *i)
+{
+	while (s[*i] == ' ')
+		i++;
+	if (s[*i] == '\'' || s[*i] == '\"')
+		return (*i);
+	return (*i);
+}
+
+//if nothing between two pipes, return 0
+int	no_pipe(char *s)
+{
+	int i;
+
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '|' && skip_spaces(s, &i) && s[i + 1] == '|')
+			return (1);
+	}
+	return (0);
+}
+
 int		parse(char *s)
 {
 	if (!s || !*s)
@@ -370,92 +406,171 @@ int		count_env(char *s)
 	return c;
 }
 
-// get_env
-char	*get_env(char *s)
-{
-	char *ret = NULL;
+char	*append(char *s, char c) {
+
 	int i = 0;
 	int len = ft_strlen(s);
-	while (i < len)
+	char *ret = (char *)malloc(sizeof(char) * (len + 2));
+	
+	if (s ) {
+		while (i < len)
+		{
+			ret[i] = s[i];
+			i++;
+		}
+	}
+	ret[i] = c;
+	ret[i + 1] = '\0';
+	return ret;
+}
+
+char	*parse_token(char *token ) {
+
+	char *ret = ft_strdup("");
+	int indbl = 0;
+	int insgl = 0;
+	int i = 0;
+	while (i < ft_strlen(token) && token[i] != '\0')
 	{
-		if (s[i] == '$')
+		while (i < ft_strlen(token) && (indbl % 2 == 0) &&  token[i] == '\'')
 		{
 			i++;
-			ret = get_token(s, &i, ' ');
-			break ;
+			insgl++;
+		}
+		while (i < ft_strlen(token) && (insgl % 2 == 0) && token[i] == '\"')
+		{
+			i++;
+			indbl++;
+		}
+		if (token[i] != '\'' && token[i] != '\"') {
+			ret = append(ret, token[i]);
 		}
 		i++;
 	}
 	return ret;
 }
 
-// while there are still env variables in string, replace them with the value of the env variable
-char	*replace_env(char *s)
+int	 ft_strchr(char *s, char c)
+{
+	int i = 0;
+	while (s[i])
+	{
+		if (s[i] == c)
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
+// take characters after $ until whitespace or end of string or $
+char	*get_env_name(char *s)
 {
 	int i = 0;
 	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (len + 1));
-	int j = 0;
-	while (i < len)
+	char *ret = (char *)malloc(sizeof(char) * (len + 2));
+	while (s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '$')
 	{
-		if (s[i] == '$')
-		{
-			i++;
-			while (s[i] != ' ' && s[i] != '\t' && s[i] != '\0')
-			{
-				ret[j] = s[i];
-				i++;
-				j++;
-			}
-			ret[j] = '\0';
-			char *tmp = get_env(ret);
-			if (tmp)
-			{
-				int k = 0;
-				while (tmp[k] != '\0')
-				{
-					ret[j] = tmp[k];
-					j++;
-					k++;
-				}
-				ret[j] = '\0';
-			}
-			i++;
-			j = 0;
-		}
-		else
-		{
-			ret[j] = s[i];
-			i++;
-			j++;
-		}
+		ret[i] = s[i];
+		i++;
 	}
-	ret[j] = '\0';
+	ret[i] = '\0';
 	return ret;
+}
+
+//getenv with array of env variables
+char 	*get_env_value(char **env)
+{
+	int i = 0;
+	char	*ret;
+	while(env[i])
+	{
+		ret = (char *)malloc(sizeof(char) * (ft_strlen(env[i]) + 1));
+		int j = 0;
+		int k = 0;
+		while (env[i][j] != '=')
+			j++;
+		j++;
+		while (env[i][j])
+			ret[k++] = env[i][j++];
+		ret[k] = '\0';
+		i++;
+	}
+	return (ret);
+}
+
+char    *expand(char *str, char **env)
+{
+    char    *new;
+    char    *tmp;
+    // char    *tmp2;
+    int     i;
+    int     j;
+    int     k;
+
+    i = 0;
+    j = 0;
+    k = 0;
+	(void)env;
+    new = (char *)malloc(sizeof(char) * (ft_strlen(str) + 1));
+    while (str[i])
+    {
+        if (str[i] == '$' && str[i + 1])
+        {
+            tmp = ft_substr(str, i + 1, ft_strlen(str) - i);
+            // tmp2 = get_env(tmp, env);
+			// printf("tmp %s\n", tmp);
+            // if (tmp2)
+            // {
+            //     while (tmp2[j])
+            //     {
+            //         new[k] = tmp2[j];
+            //         j++;
+            //         k++;
+            //     }
+            //     i += ft_strlen(tmp);
+            //     free(tmp);
+            //     free(tmp2);
+            // }
+            // else
+            // {
+            //     new[k] = str[i];
+            //     k++;
+            //     i++;
+            // }
+        }
+		// else
+		// {
+	
+		// }
+		i++;
+    }
+    new[k] = '\0';
+    return (new);
 }
 
 int main(int ac, char **av, char **env)
 {
     char *line;
-	
-	(void)av;
-	(void)env;
+
+	(void)av;	
 	if (ac != 1)
 		return (0);
 	while (1)
 	{
-		line = readline("\033[0;33mSh>");
+		line = readline("Sh> ");
 		if (*line)
 			add_history(line);
 		line = trim_whitespaces(line);
-		if (line == NULL || !*line)
-				continue ;
 		if (!parse(line))
 		{
 			write(1, "syntax error\n", 13);
 			continue;
 		}
-		g_sh = fill_sh(line);
+		line = expand(line, env);;
+		printf("%s\n", line);
+		if (line == NULL || !*line)
+				continue ;
+		// g_sh = fill_sh(line);
 	}
 	free(line);
 	return (0);

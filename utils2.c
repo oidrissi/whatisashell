@@ -50,3 +50,31 @@ int in_quotes(char *s, int pos)
 		return 1;
 	return 0;
 }
+
+//ft_strjoin
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char *ret;
+	int i;
+	int j;
+	
+	ret = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
+	i = 0;
+	if (!ret)
+		return NULL;
+	while (s1[i])
+	{
+		ret[i] = s1[i];
+		i++;
+	}
+	j = 0;
+	while (s2[j])
+	{
+		ret[i + j] = s2[j];
+		j++;
+	}
+	ret[i + j] = '\0';
+	return ret;
+}
+
+//ft_strncm

@@ -39,8 +39,11 @@ typedef struct  s_cmd
     char    **args;
     t_red     *red;
     struct s_cmd *next;
-    t_env     *env;
+    struct s_cmd *prev;
+    t_env   *env;
 }               t_cmd;
+
+t_cmd           *g_sh;
 
 int     main(int ac, char **av, char **env);
 int	    ft_strlen(char *s);
@@ -52,6 +55,10 @@ char	*ft_strdup(char *s);
 t_cmd	*ft_lstnew(char **args, t_red *red);
 int		ft_strcmp(char *s1, char *s2);
 char	*ft_substr(char *s, int start, int len);
-
+char	*get_token(char *s, int *pos, char del);
+char	*parse_token(char *token );
+char	*ft_strjoin(char *s1, char *s2);
+int		ft_strncmp(char *s1, char *s2, int n);
+char	*ft_strncpy(char *dest, char *src, unsigned int n);
 
 #endif

@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 CC = gcc
-FLAGS = -lreadline -fsanitize=address -g
+FLAGS = -Wall -Wextra -Werror -lreadline -fsanitize=address -g
 NAME = hell420
 
 SRC = minishell.c\
