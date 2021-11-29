@@ -34,13 +34,19 @@ typedef struct    s_red
     struct s_red    *next;
 }               t_red;
 
+typedef struct	s_exit
+{
+	int				status;
+	int				exit;
+}				t_exit;
+
 typedef struct  s_cmd
 {
     char    **args;
     t_red     *red;
     struct s_cmd *next;
     struct s_cmd *prev;
-    t_env   *env;
+    t_exit		*exstat;
 }               t_cmd;
 
 t_cmd           *g_sh;

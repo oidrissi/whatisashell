@@ -280,8 +280,9 @@ t_cmd	*fill_sh(char *line)
 				j++;
 				// continue ;
 			}
-			g_sh->args[j] = parse_token(g_sh->args[j]);
-			printf("%s\n", g_sh->args[j]);
+			if (parse_token(g_sh->args[j]) == 0)
+				j++;
+			printf("%s\n", parse_token(g_sh->args[j]));
 			j++;
 		}
 		g_sh = g_sh->next;
@@ -459,7 +460,7 @@ char	*parse_token(char *token ) {
 		}
 		i++;
 	}
-	// ret = append(ret, '\0');
+	ret = append(ret, '\0');
 	return ret;
 }
 
