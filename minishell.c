@@ -275,7 +275,13 @@ t_cmd	*fill_sh(char *line)
 		int j = 0;
 		while(g_sh->args[j])
 		{
-			printf("%s\n", parse_token(g_sh->args[j]));
+			while (ft_strcmp(g_sh->args[j], "\0") == 0)
+			{
+				j++;
+				// continue ;
+			}
+			g_sh->args[j] = parse_token(g_sh->args[j]);
+			printf("%s\n", g_sh->args[j]);
 			j++;
 		}
 		g_sh = g_sh->next;
@@ -430,6 +436,12 @@ char	*parse_token(char *token ) {
 	int indbl = 0;
 	int insgl = 0;
 	int i = 0;
+	while ((token[i] == '>' || token[i] == '<'))
+	{
+		i++;
+		while (token[i] == ' ')
+			i++;
+	}
 	while (i < ft_strlen(token) && token[i] != '\0')
 	{
 		while (i < ft_strlen(token) && (indbl % 2 == 0) &&  token[i] == '\'')
@@ -447,13 +459,29 @@ char	*parse_token(char *token ) {
 		}
 		i++;
 	}
+	// ret = append(ret, '\0');
 	return ret;
 }
 
-int	 ft_strchr(char *s, char c)
+//is_alnum
+int		is_alnum(char c)
+{
+	if (c >= 'a' && c <= 'z')
+		return (1);
+	if (c >= 'A' && c <= 'Z')
+		return (1);
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+
+
+//strchr
+int		ft_strchr(char *s, int c)
 {
 	int i = 0;
-	while (s[i])
+	int len = ft_strlen(s);
+	while (i < len)
 	{
 		if (s[i] == c)
 			return (i);
@@ -462,90 +490,85 @@ int	 ft_strchr(char *s, char c)
 	return (i);
 }
 
-// take characters after $ until whitespace or end of string or $
-char	*get_env_name(char *s)
+//getenv
+char	*get_env(char *s, char **env)
 {
-	int i = 0;
-	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (len + 2));
-	while (s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '$')
+	int i;
+	char *tmp;
+
+	i = 0;
+	while (env[i])
 	{
-		ret[i] = s[i];
+		tmp = ft_substr(env[i], 0, ft_strchr(env[i], '='));
+		if (ft_strcmp(tmp, s) == 0)
+			return (ft_substr(env[i], ft_strchr(env[i], '=') + 1, ft_strlen(env[i])));
 		i++;
 	}
-	ret[i] = '\0';
+	return (NULL);
+}
+
+
+//everytime we find a $, we take the characters after it and expand it
+char	*expand(char *s, char **env)
+{
+	int i = 0;
+	int b= 0;
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (100));
+	char *penv;
+	int sgl = 0;
+	while (i < len)
+	{
+		if (s[i] == '\'' && i < len)
+			sgl++;
+		if (s[i] != '$' || sgl % 2 != 0)
+			ret[b++] = s[i++];
+		if (s[i] == '$' && s[i + 1] == '$')
+		{
+			ret[b++] = '$';
+			i += 2;
+		}
+		else if (s[i] == '$' && s[i + 1])
+		{
+			i++;
+			int j = i;
+			while (s[j] && is_alnum(s[j]))
+			{
+				j++;
+			}
+			penv = get_env(ft_substr(s, i, j - i), env);
+			i = j;
+			if (penv)
+			{
+				int k = 0;
+				while (penv[k])
+				{
+					ret[b] = penv[k];
+					b++;
+					k++;
+				}
+			}
+		}
+	}
+	ret[b] = '\0';
 	return ret;
 }
 
-//getenv with array of env variables
-char 	*get_env_value(char **env)
+//function that removes all quotes from string
+char	*remove_quotes(char *s)
 {
 	int i = 0;
-	char	*ret;
-	while(env[i])
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (len + 1));
+	int b = 0;
+	while (i < len)
 	{
-		ret = (char *)malloc(sizeof(char) * (ft_strlen(env[i]) + 1));
-		int j = 0;
-		int k = 0;
-		while (env[i][j] != '=')
-			j++;
-		j++;
-		while (env[i][j])
-			ret[k++] = env[i][j++];
-		ret[k] = '\0';
+		if (s[i] != '\'' && s[i] != '\"')
+			ret[b++] = s[i];
 		i++;
 	}
-	return (ret);
-}
-
-char    *expand(char *str, char **env)
-{
-    char    *new;
-    char    *tmp;
-    // char    *tmp2;
-    int     i;
-    int     j;
-    int     k;
-
-    i = 0;
-    j = 0;
-    k = 0;
-	(void)env;
-    new = (char *)malloc(sizeof(char) * (ft_strlen(str) + 1));
-    while (str[i])
-    {
-        if (str[i] == '$' && str[i + 1])
-        {
-            tmp = ft_substr(str, i + 1, ft_strlen(str) - i);
-            // tmp2 = get_env(tmp, env);
-			// printf("tmp %s\n", tmp);
-            // if (tmp2)
-            // {
-            //     while (tmp2[j])
-            //     {
-            //         new[k] = tmp2[j];
-            //         j++;
-            //         k++;
-            //     }
-            //     i += ft_strlen(tmp);
-            //     free(tmp);
-            //     free(tmp2);
-            // }
-            // else
-            // {
-            //     new[k] = str[i];
-            //     k++;
-            //     i++;
-            // }
-        }
-		// else
-		// {
-	
-		// }
-		i++;
-    }
-    new[k] = '\0';
-    return (new);
+	ret[b] = '\0';
+	return ret;
 }
 
 int main(int ac, char **av, char **env)
@@ -566,11 +589,12 @@ int main(int ac, char **av, char **env)
 			write(1, "syntax error\n", 13);
 			continue;
 		}
-		line = expand(line, env);;
-		printf("%s\n", line);
+		line = expand(line, env);
+		line = remove_quotes(line);
+		// printf("%s\n", line);
 		if (line == NULL || !*line)
 				continue ;
-		// g_sh = fill_sh(line);
+		g_sh = fill_sh(line);
 	}
 	free(line);
 	return (0);
