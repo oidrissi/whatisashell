@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # include <unistd.h>
+# include <stdio.h>
 # include <stdlib.h>
 # include <readline/readline.h>
 # include <readline/history.h>
@@ -66,5 +67,6 @@ char	*parse_token(char *token );
 char	*ft_strjoin(char *s1, char *s2);
 int		ft_strncmp(char *s1, char *s2, int n);
 char	*ft_strncpy(char *dest, char *src, unsigned int n);
-
+char	*ft_itoa(int n);
+void        file_name(char *a, int exit_status, char **s, char **env);
 #endif

@@ -11,13 +11,14 @@
 # **************************************************************************** #
 
 CC = gcc
-FLAGS = -Wall -Wextra -Werror -lreadline -fsanitize=address -g
+FLAGS = -lreadline -fsanitize=address -g
 NAME = hell420
 
 SRC = minishell.c\
 		utils.c\
 		utils2.c\
 		methods.c\
+		code.c\
 
 all: $(NAME)
 

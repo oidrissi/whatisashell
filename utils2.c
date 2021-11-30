@@ -77,4 +77,35 @@ char	*ft_strjoin(char *s1, char *s2)
 	return ret;
 }
 
-//ft_strncm
+//ft_itoa
+char	*ft_itoa(int n)
+{
+	char	*ret;
+	int		i;
+	int		neg;
+	
+	neg = 0;
+	if (n == -2147483648)
+		return ft_strdup("-2147483648");
+	if (n < 0)
+	{
+		neg = 1;
+		n = -n;
+	}
+	i = 1;
+	while (n / i >= 10)
+		i *= 10;
+	ret = (char *)malloc(sizeof(char) * (i + 1));
+	if (!ret)
+		return NULL;
+	ret[i] = '\0';
+	while (i > 0)
+	{
+		ret[i - 1] = n % 10 + '0';
+		n /= 10;
+		i /= 10;
+	}
+	if (neg)
+		ret[0] = '-';
+	return ret;
+}

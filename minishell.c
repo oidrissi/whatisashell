@@ -22,7 +22,7 @@ t_red	*init_red()
 }
 
 t_red	*fill_red(t_red *new, char *name, int type)
-{
+{	
 	new->name = name;
 	new->type = type;
 	return (new);
@@ -62,11 +62,14 @@ char	*get_arg(char *str, int *i)
 	return (arg);
 }
 
-t_red	*redirections(char *str)
+t_red	*redirections(char *str, int exit_status, char **env)
 {
 	t_red *red;
 	int i;
-	
+	char *s;
+	char *vv;
+
+	s = NULL;
 	i = 0;
 	red = (t_red *)malloc(sizeof(t_red));
 	while (red && str[i])
@@ -78,12 +81,31 @@ t_red	*redirections(char *str)
 				if (str[i + 1] == '>')
 				{
 					red->type = 2;
-					red = fill_red(red, get_arg(str + i + 2, &i), red->type);
+					vv = get_arg(str + i + 2, &i);
+					file_name(vv, exit_status, &s, env);
+					if (!s)
+					{
+						char a[2];
+						a[0]= (char)130;
+						a[1] = '\0';
+						s = ft_strjoin(a,vv);
+					}
+					red = fill_red(red, s, red->type);
 				}
 				else
 				{
 					red->type = 1;
-					red = fill_red(red, get_arg(str + i + 1, &i), red->type);
+					vv = get_arg(str + i + 1, &i);
+					file_name(vv, exit_status, &s, env);
+					printf("%s\n", s);
+					if (!s)
+					{
+						char a[2];
+						a[0]= (char)130;
+						a[1] = '\0';
+						s = ft_strjoin(a,vv);
+					}
+					red = fill_red(red, s, red->type);
 				}
 			}
 			else if (str[i] == '<')
@@ -91,23 +113,39 @@ t_red	*redirections(char *str)
 				if (str[i + 1] == '<')
 				{
 					red->type = 4;
-					red = fill_red(red, get_arg(str + i + 2, &i), red->type);
+					vv = get_arg(str + i + 2, &i);
+					file_name(vv, exit_status, &s, env);
+					if (!s)
+					{
+						char a[2];
+						a[0]= (char)130;
+						a[1] = '\0';
+						s = ft_strjoin(a,vv);
+					}
 				}
 				else
 				{
 					red->type = 3;
-					red = fill_red(red, get_arg(str + i + 1, &i), red->type);
+					vv = get_arg(str + i + 1, &i);
+					file_name(vv, exit_status, &s, env);
+					if (!s)
+					{
+						char a[2];
+						a[0]= (char)130;
+						a[1] = '\0';
+						s = ft_strjoin(a,vv);
+					}
 				}
 			}
 			if (str[i])
 			{
-				printf("redir_type: %d && filename %s\n", red->type, red->name);
+				printf("redir_type: %d && filename %s\n", red->type, s);
 				red->next = (t_red *)malloc(sizeof(t_red));
 				red = red->next;
 			}
 			else
 			{
-				printf("redir_type: %d && filename %s\n", red->type, red->name);
+				printf("redir_type: %d && filename %s\n", red->type, s);
 				red->next = NULL;
 				return (red);
 			}
@@ -266,7 +304,7 @@ int		ft_lstlen(t_cmd *lst)
 }
 
 // check if string contains pipe, if not return 0
-t_cmd	*fill_sh(char *line)
+t_cmd	*fill_sh(char *line, int exit_status, char **env)
 {
 	init_sh();
 	char ** args;
@@ -275,9 +313,8 @@ t_cmd	*fill_sh(char *line)
 	while (args[i])
 	{
 		printf("CMD %d contains: \n", i);
-		g_sh = ft_lstnew(new_split(ft_strtrim(args[i]), ' '), redirections(args[i]));
+		g_sh = ft_lstnew(new_split(ft_strtrim(args[i]), ' '), redirections(args[i], exit_status, env));
 		int j = 0;
-		
 		while (ft_strcmp(parse_token(g_sh->args[j]), "\0") != 0)
 		{
 			// if (g_sh->args[j][0] == '>')
@@ -399,22 +436,23 @@ int	no_pipe(char *s)
 	return (0);
 }
 
-int toomuch(char *s)
+// if more than two '>' or '<' are found, return 0
+int		toomuch(char *s)
 {
 	int i;
+	int c;
 
+	c = 0;
 	i = 0;
 	while (s[i])
 	{
-		if (s[i] == '>' && s[i + 1] == '>' && is_alnum(s[i + 2]))
-			return (0);
-		else if (s[i] == '<' && s[i + 1] == '<' && is_alnum(s[i + 2]))
-			return (0);
-		else if (s[i] != '>')
-			return (0);
+		if (s[i] == '>' || s[i] == '<')
+			c++;
 		i++;
 	}
-	return (1);
+	if (c > 2)
+		return (1);
+	return (0);
 }
 
 int		parse(char *s)
@@ -466,8 +504,7 @@ char	*append(char *s, char c) {
 char	*parse_token(char *token ) {
 
 	char *ret = ft_strdup("");
-	// int indbl = 0;
-	// int insgl = 0;
+
 	int i = 0;
 	while (i < ft_strlen(token) && token[i] != '\0')
 	{
@@ -523,6 +560,31 @@ int		is_num(char c)
 	return (0);
 }
 
+// while string contains $?, replace with the exit status
+char	*replace_exit(char *s, int exit_status)
+{
+	int i = 0;
+	int len = ft_strlen(s);
+	char *ret = ft_strdup("");
+	char *tmp;
+
+	while (i < len)
+	{
+		if (s[i] == '$' && s[i + 1] == '?')
+		{
+			tmp = ft_itoa(exit_status);
+			ret = ft_strjoin(ret, tmp);
+			i += 2;
+		}
+		else
+		{
+			ret = append(ret, s[i]);
+			i++;
+		}
+	}
+	return ret;
+}
+
 //everytime we find a $, we take the characters after it and expand it
 char	*expand(char *s, char **env)
 {
@@ -536,33 +598,41 @@ char	*expand(char *s, char **env)
 	{
 		if (s[i] == '\'' && i < len)
 			sgl++;
-		if (s[i] == '$' && is_num(s[i + 1]))
-		{
-			i++;
-			if (is_num(s[i]))
-				i++;
-			ret[b++] = s[i++];
-		}
-		if (s[i] == '$' && s[i + 1] == '$')
+		else if (s[i] == '$' && s[i + 1] == '$')
 		{
 			ret[b++] = '$';
 			i += 2;
 		}
-		if (s[i] == '$' && s[i + 1] == '\'')
-			ret[b++] = s[++i];
-		else if((s[i] != '$' || sgl % 2 != 0) && i < len)
+		else if (s[i] == '$' && s[i + 1] == '\'')
 			ret[b++] = s[i++];
+		else if ((s[i] != '$' || sgl % 2 != 0) && i < len)
+			ret[b++] = s[i++];
+		else if (s[i] == '$' && is_num(s[i + 1]))
+		{
+			i++;
+			if (is_num(s[i]) && i < len)
+				i++;
+			ret[b] = s[i];
+		}
 		else if (s[i] == '$' && s[i + 1])
 		{
 			i++;
 			int j = i;
 			while (s[j] && is_alnum(s[j]))
-			{
 				j++;
-			}
 			penv = get_env(ft_substr(s, i, j - i), env);
 			i = j;
-			if (penv)
+			if (penv == NULL)
+			{
+				while (s[j] && is_alnum(s[j]))
+				{
+					ret[b] = s[j];
+					b++;
+					j++;
+				}
+				break ;
+			}
+			else
 			{
 				int k = 0;
 				while (penv[k])
@@ -574,8 +644,15 @@ char	*expand(char *s, char **env)
 			}
 			// else
 			// {
-			// 	ret = ft_strdup("130");
-			// 	return (ret);
+			// 	int g;
+			// 	char a;
+			// 	a = (char)130;
+			// 	g = b;
+			// 	ret[b] = a;
+			// 	b++;
+			// 	b = g;
+			// 	ret[b] = '\0';
+			// 	ret[b++] = s[i++];
 			// }
 		}
 	}
@@ -609,31 +686,22 @@ char	*append_space(char *s)
 	char *ret = (char *)malloc(sizeof(char) * (len + 2));
 	while (i < len)
 	{
-		ret[j++] = s[i];
-		if ((s[i] == '>' && s[i+1] != '>' && s[i + 1] != ' ') || (s[i] == '<' && s[i+1] != '<' && s[i + 1] != ' '))
+		ret[j] = s[i];
+		if ((s[i] == '>' && s[i+1] != '>' && s[i + 1] != ' ') || (s[i] == '<' && s[i+1] != '<' && s[i + 1] != ' ') || i < len)
 			ret[j++] = ' ';
 		i++;
 	}
-	ret[j] = '\0';
+	// ret[j] = '\0';
 	return ret;
 }
-// char	*format_redir(char *s)
-// {
-// 	int i = 0;
-// 	while (s[i])
-// 	{
-// 			s = append_space(s);
-// 		}
-// 		i++;
-// 	}
-// 	return s;
-// }
 
 int main(int ac, char **av, char **env)
 {
-    char *line;
+    char	*line;
+	int 	exit_status = 0;
 
-	(void)av;	
+	(void)av;
+	(void)env;
 	if (ac != 1)
 		return (0);
 	while (1)
@@ -649,13 +717,17 @@ int main(int ac, char **av, char **env)
 		}
 		else if (parse(line) == 2)
 			continue ;
-		line = expand(line, env);
-		line = remove_quotes(line);
-		line = append_space(line);
+		// line = replace_exit(line, exit_status);
+		// printf("%s\n", line);
+		// line = expand(line, env);
+
+		// printf("%s\n", line);
+		// line = append_space(line);
+		// line = remove_quotes(line);
 		// printf("%s\n", line);
 		if (line == NULL || !*line)
 				continue ;
-		g_sh = fill_sh(line);
+		g_sh = fill_sh(line, exit_status, env);
 	}
 	free(line);
 	return (0);
