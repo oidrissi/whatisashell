@@ -28,28 +28,13 @@ t_red	*fill_red(t_red *new, char *name, int type)
 	return (new);
 }
 
-t_env	*init_env()
-{
-	g_sh->env = (t_env *)malloc(sizeof(t_env));
-	g_sh->env->key = NULL;
-	g_sh->env->value = NULL;
-	return (g_sh->env);
-}
-
-t_env	*fill_env(t_env *new, char *key, char *value)
-{
-	new->key = key;
-	new->value = value;
-	return (new);
-}
-
 t_cmd	*init_sh()
 {
 	g_sh = (t_cmd *)malloc(sizeof(t_cmd));
 	g_sh->args = NULL;
 	init_red();
-	init_env();
 	g_sh->next = NULL;
+	g_sh->prev = NULL;
 	return (g_sh);
 }
 
@@ -213,6 +198,18 @@ int get_wordlen(char *s, int *pos, char del) {
 	return c;
 }
 
+//is_alnum
+int		is_alnum(char c)
+{
+	if (c >= 'a' && c <= 'z')
+		return (1);
+	if (c >= 'A' && c <= 'Z')
+		return (1);
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+
 char	*get_token(char *s, int *pos, char del)
 {
 	int i;
@@ -220,7 +217,6 @@ char	*get_token(char *s, int *pos, char del)
 	int word_len;
 	char *ret;
 	int c;
-	int j;
 
 	c = 0;
 	i = *pos;
@@ -229,9 +225,6 @@ char	*get_token(char *s, int *pos, char del)
 	ret = (char *)malloc(sizeof(char) * (word_len + 1));
 	while (i < len && c < word_len)
 	{
-		j = 0;
-		while (s[j] == ' ')
-			j++;
 		if ((i == len || s[i] == del) && in_quotes(s, i))
 			break ;
 		ret[c] = s[i];
@@ -260,11 +253,22 @@ char	**new_split(char *s,  char d) {
 	return ret;
 }
 
+//ft_lstlen(t_cmd *lst)
+int		ft_lstlen(t_cmd *lst)
+{
+	int i = 0;
+	while (lst)
+	{
+		i++;
+		lst = lst->next;
+	}
+	return i;
+}
+
 // check if string contains pipe, if not return 0
 t_cmd	*fill_sh(char *line)
 {
 	init_sh();
-	init_env();
 	char ** args;
 	int i = 0;
 	args = new_split(line, '|');
@@ -273,18 +277,26 @@ t_cmd	*fill_sh(char *line)
 		printf("CMD %d contains: \n", i);
 		g_sh = ft_lstnew(new_split(ft_strtrim(args[i]), ' '), redirections(args[i]));
 		int j = 0;
-		while(g_sh->args[j])
+		
+		while (ft_strcmp(parse_token(g_sh->args[j]), "\0") != 0)
 		{
-			while (ft_strcmp(g_sh->args[j], "\0") == 0)
-			{
-				j++;
-				// continue ;
-			}
-			if (parse_token(g_sh->args[j]) == 0)
-				j++;
-			printf("%s\n", parse_token(g_sh->args[j]));
+			// if (g_sh->args[j][0] == '>')
+			// {
+			// 	parse_token(g_sh->args[j]);
+			// }
+			printf("%s\n", g_sh->args[j]);
 			j++;
 		}
+		// while(g_sh->args[j])
+		// {
+		// 	while (ft_strcmp(parse_token(g_sh->args[j]), "\0") == 0)
+		// 	{
+		// 		j++;
+		// 		// g_sh = g_sh->next;
+		// 	}
+		// 	printf("%s\n", parse_token(g_sh->args[j]));
+		// 	j++;
+		// }
 		g_sh = g_sh->next;
 		i++;
 	}
@@ -387,13 +399,33 @@ int	no_pipe(char *s)
 	return (0);
 }
 
+int toomuch(char *s)
+{
+	int i;
+
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '>' && s[i + 1] == '>' && is_alnum(s[i + 2]))
+			return (0);
+		else if (s[i] == '<' && s[i + 1] == '<' && is_alnum(s[i + 2]))
+			return (0);
+		else if (s[i] != '>')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 int		parse(char *s)
 {
 	if (!s || !*s)
-		return (0);
-	if (s[0] == '|' || s[ft_strlen(s) - 1] == '|')
+		return (2);
+	if (s[0] == '|' || s[ft_strlen(s) - 1] == '|' || s[ft_strlen(s) - 1] == '>' || s[ft_strlen(s) - 1] == '<')
 		return (0);
 	if (!proper_quotes(s))
+		return (0);
+	if (toomuch(s))
 		return (0);
 	return (1);
 }
@@ -434,48 +466,23 @@ char	*append(char *s, char c) {
 char	*parse_token(char *token ) {
 
 	char *ret = ft_strdup("");
-	int indbl = 0;
-	int insgl = 0;
+	// int indbl = 0;
+	// int insgl = 0;
 	int i = 0;
-	while ((token[i] == '>' || token[i] == '<'))
-	{
-		i++;
-		while (token[i] == ' ')
-			i++;
-	}
 	while (i < ft_strlen(token) && token[i] != '\0')
 	{
-		while (i < ft_strlen(token) && (indbl % 2 == 0) &&  token[i] == '\'')
+		if ((token[i] == '>' || token[i] == '<'))
 		{
 			i++;
-			insgl++;
+			if (token[i] == ' ')
+				i++;
 		}
-		while (i < ft_strlen(token) && (insgl % 2 == 0) && token[i] == '\"')
-		{
-			i++;
-			indbl++;
-		}
-		if (token[i] != '\'' && token[i] != '\"') {
-			ret = append(ret, token[i]);
-		}
+		ret = append(ret, token[i]);
 		i++;
 	}
 	ret = append(ret, '\0');
 	return ret;
 }
-
-//is_alnum
-int		is_alnum(char c)
-{
-	if (c >= 'a' && c <= 'z')
-		return (1);
-	if (c >= 'A' && c <= 'Z')
-		return (1);
-	if (c >= '0' && c <= '9')
-		return (1);
-	return (0);
-}
-
 
 //strchr
 int		ft_strchr(char *s, int c)
@@ -508,6 +515,13 @@ char	*get_env(char *s, char **env)
 	return (NULL);
 }
 
+// check if character is a number
+int		is_num(char c)
+{
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
 
 //everytime we find a $, we take the characters after it and expand it
 char	*expand(char *s, char **env)
@@ -522,13 +536,22 @@ char	*expand(char *s, char **env)
 	{
 		if (s[i] == '\'' && i < len)
 			sgl++;
-		if (s[i] != '$' || sgl % 2 != 0)
+		if (s[i] == '$' && is_num(s[i + 1]))
+		{
+			i++;
+			if (is_num(s[i]))
+				i++;
 			ret[b++] = s[i++];
+		}
 		if (s[i] == '$' && s[i + 1] == '$')
 		{
 			ret[b++] = '$';
 			i += 2;
 		}
+		if (s[i] == '$' && s[i + 1] == '\'')
+			ret[b++] = s[++i];
+		else if((s[i] != '$' || sgl % 2 != 0) && i < len)
+			ret[b++] = s[i++];
 		else if (s[i] == '$' && s[i + 1])
 		{
 			i++;
@@ -549,6 +572,11 @@ char	*expand(char *s, char **env)
 					k++;
 				}
 			}
+			// else
+			// {
+			// 	ret = ft_strdup("130");
+			// 	return (ret);
+			// }
 		}
 	}
 	ret[b] = '\0';
@@ -572,6 +600,35 @@ char	*remove_quotes(char *s)
 	return ret;
 }
 
+// append a space after each '>' or '<'
+char	*append_space(char *s)
+{
+	int i = 0;
+	int j = 0;
+	int len = ft_strlen(s);
+	char *ret = (char *)malloc(sizeof(char) * (len + 2));
+	while (i < len)
+	{
+		ret[j++] = s[i];
+		if ((s[i] == '>' && s[i+1] != '>' && s[i + 1] != ' ') || (s[i] == '<' && s[i+1] != '<' && s[i + 1] != ' '))
+			ret[j++] = ' ';
+		i++;
+	}
+	ret[j] = '\0';
+	return ret;
+}
+// char	*format_redir(char *s)
+// {
+// 	int i = 0;
+// 	while (s[i])
+// 	{
+// 			s = append_space(s);
+// 		}
+// 		i++;
+// 	}
+// 	return s;
+// }
+
 int main(int ac, char **av, char **env)
 {
     char *line;
@@ -590,8 +647,11 @@ int main(int ac, char **av, char **env)
 			write(1, "syntax error\n", 13);
 			continue;
 		}
+		else if (parse(line) == 2)
+			continue ;
 		line = expand(line, env);
 		line = remove_quotes(line);
+		line = append_space(line);
 		// printf("%s\n", line);
 		if (line == NULL || !*line)
 				continue ;
