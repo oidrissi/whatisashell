@@ -97,7 +97,6 @@ t_red	*redirections(char *str, int exit_status, char **env)
 					red->type = 1;
 					vv = get_arg(str + i + 1, &i);
 					file_name(vv, exit_status, &s, env);
-					printf("%s\n", s);
 					if (!s)
 					{
 						char a[2];
@@ -291,16 +290,20 @@ char	**new_split(char *s,  char d) {
 	return ret;
 }
 
-//ft_lstlen(t_cmd *lst)
-int		ft_lstlen(t_cmd *lst)
+// if the string contains > or <, delete everything after it until the next space
+void	delete_after_redir(char *s)
 {
 	int i = 0;
-	while (lst)
+	int len = ft_strlen(s);
+	while (i < len && s[i] != ' ')
 	{
+		if (s[i] == '>' || s[i] == '<')
+		{
+			s[i] = '\0';
+			return ;
+		}
 		i++;
-		lst = lst->next;
 	}
-	return i;
 }
 
 // check if string contains pipe, if not return 0
@@ -315,25 +318,14 @@ t_cmd	*fill_sh(char *line, int exit_status, char **env)
 		printf("CMD %d contains: \n", i);
 		g_sh = ft_lstnew(new_split(ft_strtrim(args[i]), ' '), redirections(args[i], exit_status, env));
 		int j = 0;
-		while (ft_strcmp(parse_token(g_sh->args[j]), "\0") != 0)
+		while (g_sh->args[j])
 		{
-			// if (g_sh->args[j][0] == '>')
-			// {
-			// 	parse_token(g_sh->args[j]);
-			// }
-			printf("%s\n", g_sh->args[j]);
+			if (g_sh->args[j][0] == '>' || g_sh->args[j][0] == '<')
+				break ;
+			char *expanded = expand(g_sh->args[j], env);
+			printf("%s\n", expanded);
 			j++;
 		}
-		// while(g_sh->args[j])
-		// {
-		// 	while (ft_strcmp(parse_token(g_sh->args[j]), "\0") == 0)
-		// 	{
-		// 		j++;
-		// 		// g_sh = g_sh->next;
-		// 	}
-		// 	printf("%s\n", parse_token(g_sh->args[j]));
-		// 	j++;
-		// }
 		g_sh = g_sh->next;
 		i++;
 	}
@@ -399,8 +391,11 @@ int		proper_quotes(char *s)
 // check if the string contains whitespaces at the end of the string and trim them
 char	*trim_whitespaces(char *s)
 {
-	int i = 0;
-	int len = ft_strlen(s);
+	int i;
+	int len;
+
+	i = 0;
+	len = ft_strlen(s);
 	if (!s || !*s)
 		return (NULL);
 	while (s[i] == ' ' || s[i] == '\t')
@@ -410,30 +405,6 @@ char	*trim_whitespaces(char *s)
 	while (s[len - 1] == ' ')
 		len--;
 	return (ft_substr(s, i, len - i));
-}
-
-// skip spaces only if not inside quotes
-int		skip_spaces(char *s, int *i)
-{
-	while (s[*i] == ' ')
-		i++;
-	if (s[*i] == '\'' || s[*i] == '\"')
-		return (*i);
-	return (*i);
-}
-
-//if nothing between two pipes, return 0
-int	no_pipe(char *s)
-{
-	int i;
-
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] == '|' && skip_spaces(s, &i) && s[i + 1] == '|')
-			return (1);
-	}
-	return (0);
 }
 
 // if more than two '>' or '<' are found, return 0
@@ -457,8 +428,17 @@ int		toomuch(char *s)
 
 int		parse(char *s)
 {
+	int i;
+
+	i = 0;
 	if (!s || !*s)
 		return (2);
+	while (s[i])
+	{
+		if (s[i] == '|' && s[i + 1] == '|')
+			return (0);
+		i++;
+	}
 	if (s[0] == '|' || s[ft_strlen(s) - 1] == '|' || s[ft_strlen(s) - 1] == '>' || s[ft_strlen(s) - 1] == '<')
 		return (0);
 	if (!proper_quotes(s))
@@ -524,8 +504,11 @@ char	*parse_token(char *token ) {
 //strchr
 int		ft_strchr(char *s, int c)
 {
-	int i = 0;
-	int len = ft_strlen(s);
+	int i;
+	int len;
+
+	i = 0;
+	len = ft_strlen(s);
 	while (i < len)
 	{
 		if (s[i] == c)
@@ -563,11 +546,14 @@ int		is_num(char c)
 // while string contains $?, replace with the exit status
 char	*replace_exit(char *s, int exit_status)
 {
-	int i = 0;
-	int len = ft_strlen(s);
-	char *ret = ft_strdup("");
+	int i;
+	int len;
+	char *ret;
 	char *tmp;
 
+	i = 0;
+	len = ft_strlen(s);
+	ret = ft_strdup("");
 	while (i < len)
 	{
 		if (s[i] == '$' && s[i + 1] == '?')
@@ -642,18 +628,6 @@ char	*expand(char *s, char **env)
 					k++;
 				}
 			}
-			// else
-			// {
-			// 	int g;
-			// 	char a;
-			// 	a = (char)130;
-			// 	g = b;
-			// 	ret[b] = a;
-			// 	b++;
-			// 	b = g;
-			// 	ret[b] = '\0';
-			// 	ret[b++] = s[i++];
-			// }
 		}
 	}
 	ret[b] = '\0';

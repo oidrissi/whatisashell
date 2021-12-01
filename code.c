@@ -120,6 +120,7 @@ int	eeexpand(char *a, int i, char **env, char **value)
 	tmp = malloc ((i - j + 1) * sizeof(char));
 	tmp[i - j] = '\0';
 	fullfil(&tmp, a, j, i - j);
+	printf("%s\n", tmp);
 	*value = searchin_env(tmp, env);
 	free(tmp);
 	return (i);

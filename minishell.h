@@ -69,4 +69,8 @@ int		ft_strncmp(char *s1, char *s2, int n);
 char	*ft_strncpy(char *dest, char *src, unsigned int n);
 char	*ft_itoa(int n);
 void        file_name(char *a, int exit_status, char **s, char **env);
+char	*expand(char *s, char **env);
+char	*append_space(char *s);
+
+
 #endif
