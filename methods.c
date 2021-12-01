@@ -27,49 +27,27 @@ t_cmd	*ft_lstnew(char **args, t_red *red)
     return (new);
 }
 
-
-// add a new element to the list
-void	ft_lstadd(t_cmd **lst, t_cmd *new)
+//ft_itoa
+char	*ft_itoa(int n)
 {
-    t_cmd *tmp;
+    char	*str;
+    int		i;
+    int		sign;
 
-    if (!*lst)
-        *lst = new;
-    else
+    i = 1;
+    sign = (n < 0) ? -1 : 1;
+    n = n * sign;
+    while (n /= 10)
+        i++;
+    if (!(str = (char *)malloc(sizeof(char) * (i + 1))))
+        return (NULL);
+    str[i] = '\0';
+    while (i--)
     {
-        tmp = *lst;
-        while (tmp->next)
-            tmp = tmp->next;
-        tmp->next = new;
+        str[i] = (n % 10) * sign + '0';
+        n = n / 10;
     }
-}
-
-// insert a new element at the beginning of the list
-void	ft_lstinsert(t_cmd **lst, t_cmd *new)
-{
-    new->next = *lst;
-    *lst = new;
-}
-
-// ft_lstdelone
-void    ft_lstdelone(t_cmd **lst)
-{
-    t_cmd *tmp;
-
-    tmp = *lst;
-    *lst = tmp->next;
-    free(tmp);
-}
-
-// free the list
-void	ft_lstdel(t_cmd **lst)
-{
-    t_cmd *tmp;
-
-    while (*lst)
-    {
-        tmp = *lst;
-        *lst = (*lst)->next;
-        ft_lstdelone(&tmp);
-    }
+    if (sign == -1)
+        str[0] = '-';
+    return (str);
 }

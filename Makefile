@@ -20,8 +20,15 @@ NAME = hell420
 SRC = minishell.c\
 		utils.c\
 		utils2.c\
+		utils3.c\
+		utils4.c\
 		methods.c\
-		code.c\
+		expansion.c\
+		expansion2.c\
+		expansion3.c\
+		sigs.c\
+		redir.c\
+		init.c\
 
 
 all: $(NAME)

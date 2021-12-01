@@ -55,7 +55,6 @@ t_cmd           *g_sh;
 
 int     main(int ac, char **av, char **env);
 int	    ft_strlen(char *s);
-char	**ft_strsplit(char *s, char c);
 int	    is_builtin(char *s);
 int     in_quotes(char *s, int pos);
 char	*ft_strtrim(char *s);
@@ -68,9 +67,31 @@ char	*parse_token(char *token );
 char	*ft_strjoin(char *s1, char *s2);
 int		ft_strncmp(char *s1, char *s2, int n);
 char	*ft_itoa(int n);
-void        file_name(char *a, int exit_status, char **s, char **env);
+void	file_name(char *a, int exit_status, char **s, char **env);
 char	*expand(char *s, char **env);
 int		ft_strchr(char *s, int c);
-
+char	*trim_whitespaces(char *s);
+int		parse(char *s);
+char	*ft_itoa(int n);
+void	handlesig(int sig);
+void	ignctl(void);
+t_cmd	*fill_sh(char *line, int exit_status, char **env);
+char	*get_arg(char *str, int *i);
+char	**new_split(char *s,  char d);
+char	*searchin_env(char *tmp, char **env);
+int		eeexpand(char *a, int i, char **env, char **s);
+int		add_exit_status(int exit_status, char **s, int i);
+int		manage_squotes(char **s, char *a, int i);
+t_red	*redirections(char *str, int exit_status, char **env);
+char	*get_string(int i);
+int		should_add(char a, char b);
+void	add(char **s, char *a, char c);
+void	fullfil(char **tmp, char *a, int j, int k);
+char	*grab_value(char *a);
+int 	tab_len(char **s);
+int		get_wordlen(char *s, int *pos, char del);
+char	*copy_string(char *string);
+int		compaiiiire(char *argument, char *env);
+t_red	*init_red();
 
 #endif

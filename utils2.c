@@ -28,32 +28,6 @@ char	*ft_substr(char *s, int start, int len)
 	return ret;
 }
 
-int in_quotes(char *s, int pos)
-{
-	int j;
-	int indb;
-	int	insgl;
-
-	j = pos - 1;
-	indb = 0;
-	insgl = 0;
-	while (j >= 0)
-	{
-		while (j >= 0 && (s[j] == '\'' || s[j] == '\"'))
-		{
-			if (s[j] == '\'')
-				insgl++;
-			else if (s[j] == '\"')
-				indb++;
-			j--;	
-		}
-		j--;
-	}
-	if (indb % 2 == 0 && insgl % 2 == 0)
-		return 1;
-	return 0;
-}
-
 //ft_strjoin
 char	*ft_strjoin(char *s1, char *s2)
 {
@@ -80,39 +54,6 @@ char	*ft_strjoin(char *s1, char *s2)
 	return ret;
 }
 
-//ft_itoa
-char	*ft_itoa(int n)
-{
-	char	*ret;
-	int		i;
-	int		neg;
-	
-	neg = 0;
-	if (n == -2147483648)
-		return ft_strdup("-2147483648");
-	if (n < 0)
-	{
-		neg = 1;
-		n = -n;
-	}
-	i = 1;
-	while (n / i >= 10)
-		i *= 10;
-	ret = (char *)malloc(sizeof(char) * (i + 1));
-	if (!ret)
-		return NULL;
-	ret[i] = '\0';
-	while (i > 0)
-	{
-		ret[i - 1] = n % 10 + '0';
-		n /= 10;
-		i /= 10;
-	}
-	if (neg)
-		ret[0] = '-';
-	return ret;
-}
-
 //strchr
 int		ft_strchr(char *s, int c)
 {
@@ -128,4 +69,61 @@ int		ft_strchr(char *s, int c)
 		i++;
 	}
 	return (i);
+}
+
+int 	tab_len(char **s)
+{
+	int i;
+
+	i = 0;
+	if (s)
+		while (s[i] != NULL)
+			i++;			
+	return i;
+}
+
+int get_wordlen(char *s, int *pos, char del)
+{
+	int i = *pos;
+	int len = ft_strlen(s);
+	int dbl = 0;
+	int	sgl = 0;
+	int c = 0;
+	int j = 0;
+	while (i < len)
+	{
+		if (s[i] == '\'')
+		{
+			sgl++;
+			j = i + 1;
+			if (s[j] == '\0')
+				return (0);
+			while (s[j])
+			{
+				if (s[j] == '\'')
+					sgl++;
+				i++;
+				c++;
+				j++;
+			}
+		}
+		if (s[i] == '\"')
+		{
+			dbl++;
+			j = i + 1;
+			while (s[j])
+			{
+				if (s[j] == '\"')
+					dbl++;
+				i++;
+				c++;
+				j++;
+			}
+		}
+		i++;
+		c++;
+	}
+	if ((s[i] == del && s[i + 1] != del) && (sgl % 2 == 0) && (dbl % 2 == 0))
+			return c;
+	return c;
 }
