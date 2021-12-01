@@ -28,7 +28,6 @@ char	*ft_substr(char *s, int start, int len)
 	return ret;
 }
 
-//ft_strjoin
 char	*ft_strjoin(char *s1, char *s2)
 {
 	char *ret;
@@ -54,7 +53,6 @@ char	*ft_strjoin(char *s1, char *s2)
 	return ret;
 }
 
-//strchr
 int		ft_strchr(char *s, int c)
 {
 	int i;

@@ -6,13 +6,12 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 21:56:59 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/12/01 23:12:25 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/12/01 23:16:13 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// if space, take the string until the space
 char	*get_arg(char *str, int *i)
 {
 	int		compt;

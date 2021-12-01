@@ -21,14 +21,6 @@
 # include <readline/history.h>
 # include <string.h>
 
-//linked list to store env variables
-typedef struct		s_env
-{
-    char			*key;
-    char			*value;
-    struct s_env	*next;
-}					t_env;
-
 typedef struct    s_red
 {
     char            *name;
@@ -48,7 +40,6 @@ typedef struct  s_cmd
     t_red     *red;
     struct s_cmd *next;
     struct s_cmd *prev;
-    // t_exit		*exstat;
 }               t_cmd;
 
 t_cmd           *g_sh;
