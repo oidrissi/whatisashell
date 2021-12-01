@@ -30,13 +30,16 @@ char	*ft_substr(char *s, int start, int len)
 
 int in_quotes(char *s, int pos)
 {
-	int j = pos - 1;
-	
-	int indb = 0;
-	int	insgl = 0;
+	int j;
+	int indb;
+	int	insgl;
+
+	j = pos - 1;
+	indb = 0;
+	insgl = 0;
 	while (j >= 0)
 	{
-		while ( j >= 0 && (s[j] == '\'' || s[j] == '\"'))
+		while (j >= 0 && (s[j] == '\'' || s[j] == '\"'))
 		{
 			if (s[j] == '\'')
 				insgl++;
@@ -108,4 +111,21 @@ char	*ft_itoa(int n)
 	if (neg)
 		ret[0] = '-';
 	return ret;
+}
+
+//strchr
+int		ft_strchr(char *s, int c)
+{
+	int i;
+	int len;
+
+	i = 0;
+	len = ft_strlen(s);
+	while (i < len)
+	{
+		if (s[i] == c)
+			return (i);
+		i++;
+	}
+	return (i);
 }

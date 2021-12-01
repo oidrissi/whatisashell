@@ -11,7 +11,10 @@
 # **************************************************************************** #
 
 CC = gcc
-FLAGS = -lreadline -fsanitize=address -g
+LDFLAGS= -L /Users/$(USER)/goinfre/$(USER)/.brew/opt/readline/lib
+CPPFLAGS= -I /Users/$(USER)/goinfre/$(USER)/.brew/opt/readline/include
+READLINE = -lreadline $(LDFLAGS) $(CPPFLAGS)
+FLAGS = $(READLINE) -fsanitize=address -g
 NAME = hell420
 
 SRC = minishell.c\
@@ -19,6 +22,7 @@ SRC = minishell.c\
 		utils2.c\
 		methods.c\
 		code.c\
+
 
 all: $(NAME)
 

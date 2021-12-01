@@ -60,7 +60,7 @@ char	*get_string(int i)
 
 int	should_add(char a, char b)
 {
-	if ((a == '$' && (b < 48 || b > 57) && (b < 65 || b > 90) && (b < 97 || b > 122) && b != '_' && b != '?') || a != '$')
+	if ((a == '$' && (b < 48 || b > 57) && (b == '\'') && (b < 65 || b > 90) && (b < 97 || b > 122) && b != '_' && b != '?')|| a != '$')
 		return (1);
 	return (0);
 }
@@ -115,12 +115,12 @@ int	eeexpand(char *a, int i, char **env, char **value)
 	char *tmp;
 
 	j = i + 1;
-	while(a[++i] == '_' || (a[i]>=48 && a[i]<=57) || (a[i]>=65 && a[i]<=90) || (a[i]>=97 && a[i]<=122))
+	while(a[++i] == '_' || (a[i]>=48 && a[i]<=57)
+		|| (a[i]>=65 && a[i]<=90) || (a[i]>=97 && a[i]<=122))
 		continue ;
 	tmp = malloc ((i - j + 1) * sizeof(char));
 	tmp[i - j] = '\0';
 	fullfil(&tmp, a, j, i - j);
-	printf("%s\n", tmp);
 	*value = searchin_env(tmp, env);
 	free(tmp);
 	return (i);
@@ -140,6 +140,7 @@ void file_name(char *vv, int exit_status, char **s, char **env)
 	char tab[2];
 	char i;
 	char *value;
+	int j;
 
 	i = 0;
 	tab[1] = '\0';
@@ -162,20 +163,3 @@ void file_name(char *vv, int exit_status, char **s, char **env)
 		}
 	}
 }
-
-// int	main(int argc, char **argv, char **env)
-// {
-// 	int exit_status = 10;
-// 	char *file = "$5$4$UsSER"; // add special char if s null and s is null only if nothing expanded
-// 	char *s = NULL;
-	
-// 	file_name(file, exit_status, &s, env);
-// 	printf("%s\n", s);
-// 	if (!s)
-// 	{
-// 		char a[2];
-// 		a[0]= (char)130;
-// 		a[1] = '\0';
-// 		s = ft_strjoin(a,file);
-// 	}
-// }

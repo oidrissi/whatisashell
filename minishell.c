@@ -91,11 +91,13 @@ t_red	*redirections(char *str, int exit_status, char **env)
 						s = ft_strjoin(a,vv);
 					}
 					red = fill_red(red, s, red->type);
+					// printf("%s\n", s);
 				}
 				else
 				{
 					red->type = 1;
 					vv = get_arg(str + i + 1, &i);
+					// printf("%s\n", vv);
 					file_name(vv, exit_status, &s, env);
 					if (!s)
 					{
@@ -311,7 +313,9 @@ t_cmd	*fill_sh(char *line, int exit_status, char **env)
 {
 	init_sh();
 	char ** args;
-	int i = 0;
+	int i;
+
+	i = 0;
 	args = new_split(line, '|');
 	while (args[i])
 	{
@@ -501,23 +505,6 @@ char	*parse_token(char *token ) {
 	return ret;
 }
 
-//strchr
-int		ft_strchr(char *s, int c)
-{
-	int i;
-	int len;
-
-	i = 0;
-	len = ft_strlen(s);
-	while (i < len)
-	{
-		if (s[i] == c)
-			return (i);
-		i++;
-	}
-	return (i);
-}
-
 //getenv
 char	*get_env(char *s, char **env)
 {
@@ -543,43 +530,21 @@ int		is_num(char c)
 	return (0);
 }
 
-// while string contains $?, replace with the exit status
-char	*replace_exit(char *s, int exit_status)
-{
-	int i;
-	int len;
-	char *ret;
-	char *tmp;
-
-	i = 0;
-	len = ft_strlen(s);
-	ret = ft_strdup("");
-	while (i < len)
-	{
-		if (s[i] == '$' && s[i + 1] == '?')
-		{
-			tmp = ft_itoa(exit_status);
-			ret = ft_strjoin(ret, tmp);
-			i += 2;
-		}
-		else
-		{
-			ret = append(ret, s[i]);
-			i++;
-		}
-	}
-	return ret;
-}
-
 //everytime we find a $, we take the characters after it and expand it
 char	*expand(char *s, char **env)
 {
-	int i = 0;
-	int b= 0;
-	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (100));
+	int i;
+	int b;
+	int len;
+	char *ret;
 	char *penv;
-	int sgl = 0;
+	int sgl;
+
+	b = 0;
+	i = 0;
+	sgl = 0;
+	len = ft_strlen(s);
+	ret = (char *)malloc(sizeof(char) * (100));
 	while (i < len)
 	{
 		if (s[i] == '\'' && i < len)
@@ -634,53 +599,36 @@ char	*expand(char *s, char **env)
 	return ret;
 }
 
-//function that removes all quotes from string
-char	*remove_quotes(char *s)
+void	handlesig(int sig)
 {
-	int i = 0;
-	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (len + 1));
-	int b = 0;
-	while (i < len)
+	if (sig == SIGINT)
 	{
-		if (s[i] != '\'' && s[i] != '\"')
-			ret[b++] = s[i];
-		i++;
+		printf("\n");
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
 	}
-	ret[b] = '\0';
-	return ret;
 }
 
-// append a space after each '>' or '<'
-char	*append_space(char *s)
+void	ignctl(void)
 {
-	int i = 0;
-	int j = 0;
-	int len = ft_strlen(s);
-	char *ret = (char *)malloc(sizeof(char) * (len + 2));
-	while (i < len)
-	{
-		ret[j] = s[i];
-		if ((s[i] == '>' && s[i+1] != '>' && s[i + 1] != ' ') || (s[i] == '<' && s[i+1] != '<' && s[i + 1] != ' ') || i < len)
-			ret[j++] = ' ';
-		i++;
-	}
-	// ret[j] = '\0';
-	return ret;
+	struct termios	term;
+
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag &= ~ECHOCTL;
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
-int main(int ac, char **av, char **env)
+void	boucle(char *line, char **env, int exit_status)
 {
-    char	*line;
-	int 	exit_status = 0;
-
-	(void)av;
-	(void)env;
-	if (ac != 1)
-		return (0);
 	while (1)
 	{
 		line = readline("Sh> ");
+		if (line == NULL)
+		{
+			write(1, "exit\n", 5);
+			exit(1);
+		}
 		if (*line)
 			add_history(line);
 		line = trim_whitespaces(line);
@@ -691,18 +639,25 @@ int main(int ac, char **av, char **env)
 		}
 		else if (parse(line) == 2)
 			continue ;
-		// line = replace_exit(line, exit_status);
-		// printf("%s\n", line);
-		// line = expand(line, env);
-
-		// printf("%s\n", line);
-		// line = append_space(line);
-		// line = remove_quotes(line);
-		// printf("%s\n", line);
 		if (line == NULL || !*line)
 				continue ;
 		g_sh = fill_sh(line, exit_status, env);
 	}
+}
+
+int main(int ac, char **av, char **env)
+{
+    char	*line;
+	int 	exit_status;
+
+	exit_status = 0;
+	(void)av;
+	if (ac != 1)
+		return (0);
+	ignctl();
+	signal(SIGINT, handlesig);
+	signal(SIGQUIT, SIG_IGN);
+	boucle(line, env, exit_status);
 	free(line);
 	return (0);
 }
