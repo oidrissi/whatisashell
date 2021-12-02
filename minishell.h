@@ -80,7 +80,7 @@ void	add(char **s, char *a, char c);
 void	fullfil(char **tmp, char *a, int j, int k);
 char	*grab_value(char *a);
 int 	tab_len(char **s);
-int		get_wordlen(char *s, int *pos, char del);
+int		get_wordlen(char *s, int i, char del);
 char	*copy_string(char *string);
 int		compaiiiire(char *argument, char *env);
 t_red	*init_red();

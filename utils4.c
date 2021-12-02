@@ -6,17 +6,16 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 22:48:45 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/12/01 23:11:17 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/12/02 04:46:50 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// check if the string contains whitespaces at the end of the string and trim them
 char	*trim_whitespaces(char *s)
 {
-	int i;
-	int len;
+	int	i;
+	int	len;
 
 	i = 0;
 	len = ft_strlen(s);
@@ -31,29 +30,32 @@ char	*trim_whitespaces(char *s)
 	return (ft_substr(s, i, len - i));
 }
 
-// if more than two '>' or '<' are found, return 0
-int		toomuch(char *s)
+int	toomuch(char *str)
 {
-	int i;
-	int c;
+	int	i;
+	int	count;
 
-	c = 0;
 	i = 0;
-	while (s[i])
+	count = 0;
+	while (str[i])
 	{
-		if (s[i] == '>' || s[i] == '<')
-			c++;
-		i++;
+		if (str[i] == '>' || str[i] == '<')
+		{
+			count++;
+			i++;
+			if (count > 2)
+				return (0);
+		}
+		else
+			i++;
 	}
-	if (c > 2)
-		return (1);
-	return (0);
+	return (1);
 }
 
-int in_quotes(char *s, int pos)
+int	in_quotes(char *s, int pos)
 {
-	int j;
-	int indb;
+	int	j;
+	int	indb;
 	int	insgl;
 
 	j = pos - 1;
@@ -67,64 +69,33 @@ int in_quotes(char *s, int pos)
 				insgl++;
 			else if (s[j] == '\"')
 				indb++;
-			j--;	
+			j--;
 		}
 		j--;
 	}
 	if (indb % 2 == 0 && insgl % 2 == 0)
-		return 1;
-	return 0;
+		return (1);
+	return (0);
 }
 
-// if quotes are closed properly, return 1
-int		proper_quotes(char *s)
+int	proper_quotes(char *s)
 {
-	int i;
-	int sgl;
-	int dbl;
-	int len;
-	
+	int	i;
+	int	sgl;
+	int	dbl;
+	int	len;
+	int	j;
+
 	len = ft_strlen(s);
 	sgl = 0;
 	dbl = 0;
 	i = 0;
-	int j;
 	while (s[i])
 	{
 		if (s[i] == '\'')
-		{
 			sgl++;
-			j = i + 1;
-			if (s[j] == '\0')
-				return (0);
-			while (s[j])
-			{
-				if (s[j] == '\'')
-				{
-					sgl++;
-					i += 1;
-					break ;
-				}
-				i++;
-				j++;
-			}
-		}
-		if (s[i] == '\"')
-		{
+		else if (s[i] == '\"')
 			dbl++;
-			j = i + 1;
-			while (s[j])
-			{
-				if (s[j] == '\"')
-				{
-					dbl++;
-					i += 1;
-					break ;
-				}
-				i++;
-				j++;
-			}
-		}
 		i++;
 	}
 	if (dbl % 2 == 0 && sgl % 2 == 0)
@@ -132,9 +103,9 @@ int		proper_quotes(char *s)
 	return (0);
 }
 
-int		parse(char *s)
+int	parse(char *s)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (!s || !*s)
@@ -145,12 +116,12 @@ int		parse(char *s)
 			return (0);
 		i++;
 	}
-	if (s[0] == '|' || s[ft_strlen(s) - 1] == '|' || s[ft_strlen(s) - 1] == '>' || s[ft_strlen(s) - 1] == '<')
+	if (s[0] == '|' || s[ft_strlen(s) - 1] == '|'
+		|| s[ft_strlen(s) - 1] == '>' || s[ft_strlen(s) - 1] == '<')
 		return (0);
 	if (!proper_quotes(s))
 		return (0);
-	if (toomuch(s))
-		return (0);
+	// if (!toomuch(s))
+	// 	return (0);
 	return (1);
 }
-

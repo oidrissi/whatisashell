@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 21:53:57 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/12/01 21:57:25 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/12/02 06:26:18 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,17 @@ t_red	*init_red()
 }
 
 t_red	*fill_red(t_red *new, char *name, int type)
-{	
+{
 	new->name = name;
 	new->type = type;
+	new->next = NULL;
 	return (new);
 }
 
 t_red	*redirections(char *str, int exit_status, char **env)
 {
 	t_red *red;
+	t_red *save;
 	int i;
 	char *s;
 	char *vv;
@@ -38,7 +40,8 @@ t_red	*redirections(char *str, int exit_status, char **env)
 	s = NULL;
 	i = 0;
 	red = (t_red *)malloc(sizeof(t_red));
-	while (red && str[i])
+	save = red;
+	while (str[i])
 	{
 		if (str[i] == '>' || str[i] == '<')
 		{
@@ -58,7 +61,6 @@ t_red	*redirections(char *str, int exit_status, char **env)
 						s = ft_strjoin(a,vv);
 					}
 					red = fill_red(red, s, red->type);
-					// printf("%s\n", s);
 				}
 				else
 				{
@@ -91,6 +93,7 @@ t_red	*redirections(char *str, int exit_status, char **env)
 						a[1] = '\0';
 						s = ft_strjoin(a,vv);
 					}
+					red = fill_red(red, s, red->type);
 				}
 				else
 				{
@@ -105,23 +108,27 @@ t_red	*redirections(char *str, int exit_status, char **env)
 						a[1] = '\0';
 						s = ft_strjoin(a,vv);
 					}
+					red = fill_red(red, s, red->type);
 				}
 			}
 			if (str[i])
 			{
-				printf("redir_type: %d && filename %s\n", red->type, s);
+				// printf("redir_type: %d && filename %s\n", red->type, s);
 				red->next = (t_red *)malloc(sizeof(t_red));
 				red = red->next;
 			}
 			else
 			{
-				printf("redir_type: %d && filename %s\n", red->type, s);
+				// printf("redir_type: %d && filename %s\n", red->type, s);
 				red->next = NULL;
-				return (red);
+				return (save);
 			}
 		}
 		else
+		{
+			red = fill_red(red, NULL, 0);
 			i++;
+		}
 	}
-	return (red);
+	return (save);
 }

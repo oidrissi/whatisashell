@@ -12,6 +12,36 @@
 
 #include "minishell.h"
 
+void	show_red(t_red *red)
+{
+	t_red *tmp;
+	tmp = red;
+	while(tmp)
+	{
+		if (tmp->name != NULL)
+			printf("name =%s and type=%d \n", tmp->name, tmp->type);
+		tmp = tmp->next;
+	}
+	// printf("next =%p \n", tmp->next);
+}
+
+void	show_command()
+{
+	t_cmd *cmd;
+	int i;
+	
+	cmd = g_sh;
+	while(cmd)
+	{
+		i  = -1;
+		while(cmd->args[++i])
+	 		printf("COMMAND:%s\n", cmd->args[i]);
+		show_red(cmd->red);
+		cmd = cmd->next;
+	}
+	// exit (1);
+}
+
 void	boucle(char *line, char **env, int exit_status)
 {
 	while (1)
@@ -34,7 +64,9 @@ void	boucle(char *line, char **env, int exit_status)
 			continue ;
 		if (line == NULL || !*line)
 				continue ;
+		// printf("%s\n", line);
 		g_sh = fill_sh(line, exit_status, env);
+		show_command();
 	}
 }
 

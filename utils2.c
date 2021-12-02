@@ -14,9 +14,9 @@
 
 char	*ft_substr(char *s, int start, int len)
 {
-	char *ret;
-	int i;
-	
+	char	*ret;
+	int		i;
+
 	ret = (char *)malloc(sizeof(char) * (len + 1));
 	i = 0;
 	while (i < len)
@@ -25,19 +25,19 @@ char	*ft_substr(char *s, int start, int len)
 		i++;
 	}
 	ret[i] = '\0';
-	return ret;
+	return (ret);
 }
 
 char	*ft_strjoin(char *s1, char *s2)
 {
-	char *ret;
-	int i;
-	int j;
-	
+	char	*ret;
+	int		i;
+	int		j;
+
 	ret = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
 	i = 0;
 	if (!ret)
-		return NULL;
+		return (NULL);
 	while (s1[i])
 	{
 		ret[i] = s1[i];
@@ -50,13 +50,13 @@ char	*ft_strjoin(char *s1, char *s2)
 		j++;
 	}
 	ret[i + j] = '\0';
-	return ret;
+	return (ret);
 }
 
-int		ft_strchr(char *s, int c)
+int	ft_strchr(char *s, int c)
 {
-	int i;
-	int len;
+	int	i;
+	int	len;
 
 	i = 0;
 	len = ft_strlen(s);
@@ -69,59 +69,87 @@ int		ft_strchr(char *s, int c)
 	return (i);
 }
 
-int 	tab_len(char **s)
+int	tab_len(char **s)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (s)
+	{
 		while (s[i] != NULL)
-			i++;			
-	return i;
+			i++;
+	}
+	return (i);
 }
 
-int get_wordlen(char *s, int *pos, char del)
+void	hold2(int *i, int *c)
 {
-	int i = *pos;
-	int len = ft_strlen(s);
-	int dbl = 0;
-	int	sgl = 0;
-	int c = 0;
-	int j = 0;
-	while (i < len)
+	*i = *i + 1;
+	*c = *c + 1;
+}
+
+void	hold(int *i, int *j, int *c)
+{
+	*i = *i + 1;
+	*j = *j + 1;
+	*c = *c + 1;
+}
+
+void	init(int *dbl, int *sgl, int *c, int *j)
+{
+	*dbl = 0;
+	*sgl = 0;
+	*c = 0;
+	*j = 0;
+}
+
+void	more_help(int *sgl, int *j, int *i)
+{
+	*sgl = *sgl + 1;
+	*j = *i + 1;
+}
+
+void	more_help2(int *dbl, int *j, int *i)
+{
+	*dbl = *dbl + 1;
+	*j = *i + 1;
+}
+
+int	get_wordlen(char *s, int i, char del)
+{
+	int dbl;
+	int	sgl;
+	int c;
+	int j;
+
+	init(&dbl, &sgl, &c, &j);
+	while (i < ft_strlen(s))
 	{
 		if (s[i] == '\'')
 		{
-			sgl++;
-			j = i + 1;
+			more_help(&sgl, &j, &i);
 			if (s[j] == '\0')
 				return (0);
 			while (s[j])
 			{
 				if (s[j] == '\'')
 					sgl++;
-				i++;
-				c++;
-				j++;
+				hold(&i, &j, &c);
 			}
 		}
 		if (s[i] == '\"')
 		{
-			dbl++;
-			j = i + 1;
+			more_help2(&dbl, &j, &i);
 			while (s[j])
 			{
 				if (s[j] == '\"')
 					dbl++;
-				i++;
-				c++;
-				j++;
+				hold(&i, &j, &c);
 			}
 		}
-		i++;
-		c++;
+		hold2(&i, &c);
 	}
 	if ((s[i] == del && s[i + 1] != del) && (sgl % 2 == 0) && (dbl % 2 == 0))
-			return c;
-	return c;
+			return (c);
+	return (c);
 }
