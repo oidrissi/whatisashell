@@ -22,7 +22,6 @@ void	show_red(t_red *red)
 			printf("name =%s and type=%d \n", tmp->name, tmp->type);
 		tmp = tmp->next;
 	}
-	// printf("next =%p \n", tmp->next);
 }
 
 void	show_command()
@@ -39,7 +38,6 @@ void	show_command()
 		show_red(cmd->red);
 		cmd = cmd->next;
 	}
-	// exit (1);
 }
 
 void	boucle(char *line, char **env, int exit_status)
@@ -64,7 +62,6 @@ void	boucle(char *line, char **env, int exit_status)
 			continue ;
 		if (line == NULL || !*line)
 				continue ;
-		// printf("%s\n", line);
 		g_sh = fill_sh(line, exit_status, env);
 		show_command();
 	}

@@ -29,6 +29,8 @@ SRC = minishell.c\
 		sigs.c\
 		redir.c\
 		init.c\
+		utils5.c\
+
 
 
 all: $(NAME)
@@ -39,6 +41,5 @@ $(NAME): $(SRC)
 clean:
 	@rm -rf $(NAME)
 
-fclean: clean
-
-re: fclean all
+fclean: clean“
+re: fclean all07

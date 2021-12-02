@@ -82,74 +82,30 @@ int	tab_len(char **s)
 	return (i);
 }
 
-void	hold2(int *i, int *c)
-{
-	*i = *i + 1;
-	*c = *c + 1;
-}
-
-void	hold(int *i, int *j, int *c)
-{
-	*i = *i + 1;
-	*j = *j + 1;
-	*c = *c + 1;
-}
-
-void	init(int *dbl, int *sgl, int *c, int *j)
-{
-	*dbl = 0;
-	*sgl = 0;
-	*c = 0;
-	*j = 0;
-}
-
-void	more_help(int *sgl, int *j, int *i)
-{
-	*sgl = *sgl + 1;
-	*j = *i + 1;
-}
-
-void	more_help2(int *dbl, int *j, int *i)
-{
-	*dbl = *dbl + 1;
-	*j = *i + 1;
-}
-
 int	get_wordlen(char *s, int i, char del)
 {
-	int dbl;
+	int	dbl;
 	int	sgl;
-	int c;
-	int j;
+	int	c;
+	int	j;
 
 	init(&dbl, &sgl, &c, &j);
 	while (i < ft_strlen(s))
 	{
 		if (s[i] == '\'')
 		{
-			more_help(&sgl, &j, &i);
-			if (s[j] == '\0')
+			if (!more_help(&sgl, &j, &i, s))
 				return (0);
 			while (s[j])
-			{
-				if (s[j] == '\'')
-					sgl++;
-				hold(&i, &j, &c);
-			}
+				c = hold_s(&dbl, &j, &i, s) + c + 1;
 		}
 		if (s[i] == '\"')
 		{
 			more_help2(&dbl, &j, &i);
 			while (s[j])
-			{
-				if (s[j] == '\"')
-					dbl++;
-				hold(&i, &j, &c);
-			}
+				c = hold_d(&dbl, &j, &i, s) + c + 1;
 		}
 		hold2(&i, &c);
 	}
-	if ((s[i] == del && s[i + 1] != del) && (sgl % 2 == 0) && (dbl % 2 == 0))
-			return (c);
 	return (c);
 }

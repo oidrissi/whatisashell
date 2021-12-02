@@ -23,9 +23,9 @@
 
 typedef struct    s_red
 {
-    char            *name;
-    int             type;
-    struct s_red    *next;
+	char            *name;
+	int             type;
+	struct s_red    *next;
 }               t_red;
 
 typedef struct	s_exit
@@ -36,10 +36,10 @@ typedef struct	s_exit
 
 typedef struct  s_cmd
 {
-    char    **args;
-    t_red     *red;
-    struct s_cmd *next;
-    struct s_cmd *prev;
+	char    **args;
+	t_red     *red;
+	struct s_cmd *next;
+	struct s_cmd *prev;
 }               t_cmd;
 
 t_cmd           *g_sh;
@@ -84,5 +84,11 @@ int		get_wordlen(char *s, int i, char del);
 char	*copy_string(char *string);
 int		compaiiiire(char *argument, char *env);
 t_red	*init_red();
+void	more_help2(int *dbl, int *j, int *i);
+int     more_help(int *sgl, int *j, int *i, char *s);
+int     hold_d(int *dbl, int *j, int *i, char *s);
+int		hold_s(int *dbl, int *j, int *i, char *s);
+void	hold2(int *i, int *c);
+void	init(int *dbl, int *sgl, int *c, int *j);
 
 #endif
