@@ -18,8 +18,7 @@ void	show_red(t_red *red)
 	tmp = red;
 	while(tmp)
 	{
-		if (tmp->name != NULL)
-			printf("name =%s and type=%d \n", tmp->name, tmp->type);
+		printf("name =%s and type=%d \n", tmp->name, tmp->type);
 		tmp = tmp->next;
 	}
 }
@@ -34,8 +33,16 @@ void	show_command()
 	{
 		i  = -1;
 		while(cmd->args[++i])
+		{
 	 		printf("COMMAND:%s\n", cmd->args[i]);
+		}
+		printf("|");
+		// if(g_sh->red)
+		// 	printf("hello\n");
+		// else
+		// 	printf("no red\n");
 		show_red(cmd->red);
+		printf("|\n");
 		cmd = cmd->next;
 	}
 }

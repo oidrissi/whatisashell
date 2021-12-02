@@ -21,8 +21,6 @@ t_cmd	*ft_lstnew(char **args, t_red *red)
 	if (!new)
 		return (NULL);
 	new->args = args;
-	if (!red)
-		new->red = NULL;
 	new->red = red;
 	return (new);
 }

@@ -6,7 +6,7 @@
 /*   By: oidrissi <oidrissi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/01 21:53:57 by oidrissi          #+#    #+#             */
-/*   Updated: 2021/12/02 06:26:18 by oidrissi         ###   ########.fr       */
+/*   Updated: 2021/12/02 22:03:25 by oidrissi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ t_red	*redirections(char *str, int exit_status, char **env)
 	i = 0;
 	red = (t_red *)malloc(sizeof(t_red));
 	save = red;
+	printf("RECEIVED : %s\n", str);
 	while (str[i])
 	{
 		if (str[i] == '>' || str[i] == '<')
@@ -111,11 +112,12 @@ t_red	*redirections(char *str, int exit_status, char **env)
 					red = fill_red(red, s, red->type);
 				}
 			}
-			if (str[i])
+			if (str[i] || str[i] == ' ')
 			{
 				// printf("redir_type: %d && filename %s\n", red->type, s);
 				red->next = (t_red *)malloc(sizeof(t_red));
 				red = red->next;
+				// red = NULL;
 			}
 			else
 			{
@@ -123,12 +125,11 @@ t_red	*redirections(char *str, int exit_status, char **env)
 				red->next = NULL;
 				return (save);
 			}
+		// red->next = NULL;
 		}
-		else
-		{
-			red = fill_red(red, NULL, 0);
-			i++;
-		}
+		i++;
 	}
+	free(save);
+	save = NULL;
 	return (save);
 }
